@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Tâb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/app.js" defer></script>
+  <script src="js/board.js" defer></script>
+  <script src="js/game.js" defer></script>
+  <script src="js/dice.js" defer></script>
+  <script src="js/ai.js" defer></script>
+</head>
+<body>
+  <header>
+    <img src="assets/logo.svg" alt="Tâb" class="logo">
+    <h1>Tâb</h1>
+  </header>
+
+  <main>
+    <section id="config">
+      <h2>Configuração</h2>
+      <label for="boardSize">Tamanho do tabuleiro:</label>
+      <input id="boardSize" type="number" min="7" max="15" step="2" value="7">
+
+      <label for="firstPlayer">Primeiro jogador:</label>
+      <select id="firstPlayer">
+        <option value="human">Humano</option>
+        <option value="ai">Computador</option>
+      </select>
+
+      <label for="aiLevel">Nível da IA:</label>
+      <select id="aiLevel">
+        <option value="easy">Fácil</option>
+        <option value="medium">Médio</option>
+      </select>
+
+      <button id="startBtn">Iniciar Jogo</button>
+    </section>
+
+    <section id="game">
+      <div id="board"></div>
+
+      <div id="controls">
+        <button id="rollDiceBtn">Lançar Dado</button>
+        <button id="passTurnBtn">Passar Vez</button>
+        <button id="giveUpBtn">Desistir</button>
+        <button id="showRulesBtn">Instruções</button>
+        <button id="showScoresBtn">Classificações</button>
+      </div>
+
+      <div id="diceResult"></div>
+      <div id="messageArea"></div>
+    </section>
+
+    <section id="panels" class="hidden">
+      <div id="rulesPanel" class="panel hidden">
+        <h2>Regras do Jogo</h2>
+        <p>// TODO: adicionar texto das regras</p>
+        <button class="closePanel">Fechar</button>
+      </div>
+
+      <div id="scoresPanel" class="panel hidden">
+        <h2>Classificações</h2>
+        <table id="scoreTable">
+          <thead>
+            <tr><th>Jogador</th><th>Resultado</th><th>Data</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button id="clearScores">Limpar</button>
+        <button class="closePanel">Fechar</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
