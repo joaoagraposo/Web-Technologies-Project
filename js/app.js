@@ -22,6 +22,7 @@ function showMessage(msg) {
 }
 
 function passTurn() {
+  
   showMessage("Vez passada.");
 }
 

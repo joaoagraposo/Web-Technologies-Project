@@ -20,8 +20,10 @@
     <section id="config">
       <h2>Configuração</h2>
       <label for="boardSize">Tamanho do tabuleiro:</label>
-      <input id="boardSize" type="number" min="7" max="15" step="2" value="7">
-
+        <button type="button" onclick="changeSize(-2)">-</button>
+        <input id="boardSize" type="number" min="7" max="15" step="2" value="7" readonly >
+        <button type="button" onclick="changeSize(2)">+</button>
+     
       <label for="firstPlayer">Primeiro jogador:</label>
       <select id="firstPlayer">
         <option value="human">Humano</option>
