@@ -30,8 +30,8 @@ function renderPieces(boardState) {
 
 
     const token = document.createElement('div');
-    token.className = `piece ${occupant}`; 
-    token.setAttribute('aria-label', `${occupant} piece`);
+    token.className = `piece ${occupant.color}`; 
+    token.setAttribute('aria-label', `${occupant.color} piece`);
 
     cell.appendChild(token);
   });
@@ -57,10 +57,27 @@ function onCellClick(e) {
   if (piece !== 'blue') return showMessage("You can only move blue pieces.");
 
 
-  const { destRow, destCol, valid, reason } = computeDestination(row, col, dice, piece, gameState.size);
-
+  computeDestination(row, col, dice, piece, gameState.size);
+  if (piece.dest !== null){
+    
+  }
+  
 
 }
 
+function computeDestination(row, col, dice, piece, size){
 
+}
 
+function evenMove (dice){
+  
+  return dice
+}
+
+function oddMove (dice){
+
+}
+
+function checkWin(){
+
+}

@@ -6,8 +6,19 @@ let gameState = {
   move: null,
   extramove: null,
   selectedPiece: null,
+  redpices: new Map(),
+  bluepieces : new Map(),
 };
-// move pode  ser 0 1 2, 2 signfica q pode repete jogada
+
+class Piece {
+  constructor(color, dest) {
+    this.color = color;
+    this.hasmove = hasmove;
+    this.destrow = destrow;
+    this.destcol = destcol;
+  }
+
+}
 
 function changeSize(delta){
   const input = document.getElementById('boardSize');
@@ -22,7 +33,9 @@ function changeSize(delta){
 function initGame(size) {
   gameState.size = size;
   gameState.board = initPieces(size);
-  gameState.currentPlayer = 'human';
+  gameState.redpices = size;
+  gameState.bluepieces = size;
+  gameState.currentPlayer = document.getElementById('firstPlayer');
   renderPieces(gameState.board)
 }
 
@@ -30,11 +43,15 @@ function initPieces(size) {
   const board = Array.from({ length: 4 }, () => Array(size).fill(null));
   
     for (let col = 0; col < size; col++) {
-      board[0][col] = 'red'; 
+      const piece = new Piece ('red', null);
+      gameState.redpices.set(piece, piece.dest);
+      board[0][col] = piece; 
     }
 
     for (let col = 0; col < size; col++) {
-      board[3][col] = 'blue'; 
+      const piece = new Piece ('blue', null)
+      gameState.bluepieces.set(piece, piece.dest);
+      board[3][col] = piece; 
     }
     return board;
 }
