@@ -40,6 +40,8 @@ function initGame(size) {
   gameState.selectedPiece = null;
   gameState.movePreview = null;
   renderPieces(gameState.board);
+  document.getElementById('diceResult').innerText = `Lance o dado, ${gameState.currentPlayer}`;
+
 }
 
 function initPieces(size) {
