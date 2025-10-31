@@ -6,21 +6,21 @@ let gameState = {
   move: null,
   extramove: null,
   selectedPiece: null,
-  redpices: new Map(),
-  bluepieces : new Map(),
+  redPieces: new Map(),
+  bluePieces: new Map(),
 };
 
 class Piece {
-  constructor(color, dest) {
-    this.color = color;
-    this.hasmove = hasmove;
-    this.destrow = destrow;
-    this.destcol = destcol;
+  constructor(color, dest = null) {
+    this.color = color;  
+    this.dest = dest;     
+    this.hasMoved = false;  
+    this.destRow = null;    
+    this.destCol = null;
   }
-
 }
 
-function changeSize(delta){
+function changeSize(delta) {
   const input = document.getElementById('boardSize');
   const min = parseInt(input.min);
   const max = parseInt(input.max);
@@ -29,42 +29,89 @@ function changeSize(delta){
   input.value = value;
 }
 
-
 function initGame(size) {
   gameState.size = size;
   gameState.board = initPieces(size);
-  gameState.redpices = size;
-  gameState.bluepieces = size;
-  gameState.currentPlayer = document.getElementById('firstPlayer');
-  renderPieces(gameState.board)
+  gameState.currentPlayer = document.getElementById('firstPlayer').value;
+  gameState.diceValue = null;
+  gameState.move = null;
+  gameState.extramove = null;
+  gameState.selectedPiece = null;
+  gameState.movePreview = null;
+  renderPieces(gameState.board);
 }
 
 function initPieces(size) {
   const board = Array.from({ length: 4 }, () => Array(size).fill(null));
-  
-    for (let col = 0; col < size; col++) {
-      const piece = new Piece ('red', null);
-      gameState.redpices.set(piece, piece.dest);
-      board[0][col] = piece; 
-    }
 
-    for (let col = 0; col < size; col++) {
-      const piece = new Piece ('blue', null)
-      gameState.bluepieces.set(piece, piece.dest);
-      board[3][col] = piece; 
-    }
-    return board;
+  gameState.redPieces = new Map();
+  gameState.bluePieces = new Map();
+
+  for (let col = 0; col < size; col++) {
+    const piece = new Piece('red');
+    board[0][col] = piece;
+
+    gameState.redPieces.set(piece, {
+      hasMove: false,
+      destRow: null,
+      destCol: null,
+    });
+  }
+
+  for (let col = 0; col < size; col++) {
+    const piece = new Piece('blue');
+    board[3][col] = piece;
+    gameState.bluePieces.set(piece, {
+      hasMove: false,
+      destRow: null,
+      destCol: null,
+    });
+  }
+
+  return board;
 }
-z
+
 function nextTurn() {
-  if(gameState.move === 2){
+  if (gameState.move === 2) {
     gameState.move = null;
     gameState.diceValue = null;
+  } else {
+    gameState.currentPlayer =
+      gameState.currentPlayer === 'human' ? 'ai' : 'human';
+    showMessage(
+      `Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'}`
+    );
+    if (gameState.currentPlayer === 'ai') aiMove();
   }
-  else{
-  gameState.currentPlayer = (gameState.currentPlayer === 'human') ? 'ai' : 'human';
-  showMessage(`Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'}`);
-  if (gameState.currentPlayer === 'ai') aiMove();
-  }  
 }
-            
+
+
+
+
+function findPieceOnBoard(piece) {
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < gameState.size; c++) {
+      if (gameState.board[r][c] === piece) {
+        return { row: r, col: c };
+      }
+    }
+  }
+  return null;
+}
+
+
+function anyBlueInStartRow() {
+  for (const [piece] of gameState.bluePieces) {
+    const pos = findPieceOnBoard(piece);
+    if (pos && pos.row === 3) return true;
+  }
+  return false;
+}
+
+function anyRedInStartRow(){
+  for (const [piece] of gameState.redPieces) {
+    const pos = findPieceOnBoard(piece);
+    if (pos && pos.row === 3) return true;
+  }
+  return false;
+}
