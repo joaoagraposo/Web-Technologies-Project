@@ -1,3 +1,4 @@
+// dice.js
 function rollDice() {
   if(gameState.diceValue===null){
   const sticks = Array.from({ length: 4 }, () => Math.random() < 0.5 ? 0 : 1);

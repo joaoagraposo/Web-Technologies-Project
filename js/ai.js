@@ -1,3 +1,4 @@
+// ai.js
 function aiMove() {
   showMessage("IA a jogar...");
   setTimeout(() => {

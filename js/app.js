@@ -1,3 +1,4 @@
+// app.js
 window.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('startBtn');
   const rollDiceBtn = document.getElementById('rollDiceBtn');

@@ -1,3 +1,4 @@
+// board.js
 function createBoard(size) {
   const board = document.getElementById('board');
   board.innerHTML = '';

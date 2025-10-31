@@ -1,3 +1,4 @@
+// game.js
 let gameState = {
   size: 7,
   currentPlayer: 'human',
