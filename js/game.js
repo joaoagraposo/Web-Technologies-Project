@@ -30,6 +30,7 @@ function changeSize(delta) {
 }
 
 function initGame(size) {
+  showMessage("New Game Started.");
   gameState.size = size;
   gameState.board = initPieces(size);
   gameState.currentPlayer = document.getElementById('firstPlayer').value;
