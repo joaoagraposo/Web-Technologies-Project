@@ -65,22 +65,21 @@ function onCellClick(e) {
 
 }
 
-/* ======== LÓGICA DE CAMINHO TÂB ======== */
 
-// linha que anda ESQUERDA -> DIREITA
+
 function isForwardRow(row) {
-  // aqui decidi: 3 e 1 vão para a direita
+
   return row === 3 || row === 1;
 }
 
 function computeDestination(row, col, dice, piece, size) {
-  // 1) regra: primeira vez tem de ser 1
+
   if (!piece.hasMoved && dice !== 1) {
     showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
     return;
   }
 
-  // 2) regra: se já está no topo, só mexe se a base estiver livre
+
   if (row === 0 && anyBlueInStartRow()) {
     showMessage(
       'Tens peças na linha inicial (row 3), não podes avançar com as que estão no topo.'
@@ -92,7 +91,7 @@ function computeDestination(row, col, dice, piece, size) {
   let curCol = col;
   let steps = dice;
 
-  // anda "dice" passos
+
   while (steps > 0) {
     if (isForwardRow(curRow)) {
       ({ row: curRow, col: curCol } = evenMove(curRow, curCol, size));
@@ -102,12 +101,12 @@ function computeDestination(row, col, dice, piece, size) {
     steps--;
   }
 
-  // guardar destino na peça
+
   piece.destRow = curRow;
   piece.destCol = curCol;
   piece.hasMove = true;
 
-  // guardar também no map da cor (opcional mas útil)
+
   const map =
     piece.color === 'blue' ? gameState.bluePieces : gameState.redPieces;
   const meta = map.get(piece);
@@ -117,7 +116,7 @@ function computeDestination(row, col, dice, piece, size) {
     meta.hasMove = true;
   }
 
-  // pintar origem e destino
+
   const originCell = document.querySelector(
     `.cell[data-row="${row}"][data-col="${col}"]`
   );
@@ -128,7 +127,7 @@ function computeDestination(row, col, dice, piece, size) {
   );
   if (destCell) destCell.classList.add('highlight-move');
 
-  // guardar no estado para o clique seguinte saber
+
   gameState.movePreview = {
     from: { row, col },
     to: { row: curRow, col: curCol },
@@ -136,16 +135,16 @@ function computeDestination(row, col, dice, piece, size) {
   };
 }
 
-// esquerda -> direita; se não der, sobe
+
 function evenMove(row, col, size) {
   if (col + 1 < size) {
     return { row, col: col + 1 };
   }
-  // chegou ao fim -> sobe
+
   return { row: row - 1, col };
 }
 
-// direita -> esquerda; se não der, sobe
+
 function oddMove(row, col, size) {
   if (col - 1 >= 0) {
     return { row, col: col - 1 };
@@ -153,44 +152,37 @@ function oddMove(row, col, size) {
   return { row: row - 1, col };
 }
 
-/* ======== APLICAR O MOVIMENTO ======== */
 
 function applyMove(move) {
   const { from, to, piece } = move;
 
-  // se a casa destino tiver peça da mesma cor -> bloquear
+
   const target = gameState.board[to.row][to.col];
   if (target && target.color === piece.color) {
     showMessage('Casa ocupada pela tua peça.');
     return;
   }
 
-  // mover no board
+
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
-  // marcar que já se mexeu alguma vez
   piece.hasMoved = true;
 
-  // limpar preview
   gameState.movePreview = null;
 
-  // redesenhar
   renderPieces(gameState.board);
 
-  // limpar highlights
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
 
-  // gerir extra-move do dado
   if (gameState.extramove) {
     gameState.extramove = false;
     gameState.diceValue = null;
     return;
   }
 
-  // fim do turno normal
   gameState.diceValue = null;
   nextTurn();
 }
