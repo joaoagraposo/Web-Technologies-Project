@@ -6,7 +6,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   startBtn.addEventListener('click', startGame);
   rollDiceBtn.addEventListener('click', rollDice);
-  passTurnBtn.addEventListener('click', nextTurn);
+  passTurnBtn.addEventListener('click', passTurn);
   giveUpBtn.addEventListener('click', giveUp);
 });
 
@@ -22,8 +22,8 @@ function showMessage(msg) {
 }
 
 function passTurn() {
-  
   showMessage("Vez passada.");
+  nextTurn();
 }
 
 function giveUp() {
