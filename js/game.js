@@ -85,6 +85,7 @@ function nextTurn() {
       `Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'}`
     );
     if (gameState.currentPlayer === 'ai') aiMove();
+    gameState.diceValue = null
   }
 }
 

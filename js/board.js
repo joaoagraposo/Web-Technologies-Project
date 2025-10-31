@@ -38,7 +38,7 @@ function renderPieces(boardState) {
 }
 
 function onCellClick(e) {
-
+  // Clear all highlights before handling new click
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
@@ -46,28 +46,43 @@ function onCellClick(e) {
   const row = Number(e.currentTarget.dataset.row);
   const col = Number(e.currentTarget.dataset.col);
   const dice = gameState.diceValue;
-
-
-  if (gameState.movePreview &&
-      gameState.movePreview.to.row === row &&
-      gameState.movePreview.to.col === col) {
-    return applyMove(gameState.movePreview);
-  }
-
   const piece = gameState.board[row][col];
 
   if (dice === null) return showMessage("Dice not used");
   if (gameState.currentPlayer !== 'human') return showMessage("Not your turn.");
-  if (!piece) return showMessage("Empty cell.");
-  if (piece.color !== 'blue') return showMessage("You can only move blue pieces.");
 
+  // If there's an active preview...
+  if (gameState.movePreview) {
+    const { to } = gameState.movePreview;
 
-  computeDestination(row, col, dice, piece, gameState.size);
-  if (piece.dest !== null){
-    
+    // If the clicked cell matches the preview destination
+    if (to.row === row && to.col === col) {
+      const target = gameState.board[row][col];
+
+      // If the destination has one of your own pieces, don't move — select it instead
+      if (target && target.color === 'blue') {
+        gameState.movePreview = null;
+        computeDestination(row, col, dice, target, gameState.size);
+        return;
+      }
+
+      // Otherwise, valid move — apply it
+      return applyMove(gameState.movePreview);
+    }
+
+    // If you clicked any other cell, reset move preview
+    gameState.movePreview = null;
   }
 
+  // If clicked a blue piece, start selection / compute possible move
+  if (piece && piece.color === 'blue') {
+    computeDestination(row, col, dice, piece, gameState.size);
+    return;
+  }
 
+  // Otherwise, invalid clicks
+  if (!piece) return showMessage("Empty cell.");
+  if (piece.color !== 'blue') return showMessage("You can only move blue pieces.");
 }
 
 function isForwardRow(row) {
@@ -156,13 +171,11 @@ function oddMove(row, col, size) {
 function applyMove(move) {
   const { from, to, piece } = move;
 
-
   const target = gameState.board[to.row][to.col];
   if (target && target.color === piece.color) {
     showMessage('Casa ocupada pela tua peça.');
     return;
   }
-
 
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;

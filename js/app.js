@@ -6,7 +6,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   startBtn.addEventListener('click', startGame);
   rollDiceBtn.addEventListener('click', rollDice);
-  passTurnBtn.addEventListener('click', passTurn);
+  passTurnBtn.addEventListener('click', nextTurn);
   giveUpBtn.addEventListener('click', giveUp);
 });
 
