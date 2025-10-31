@@ -38,6 +38,11 @@ function renderPieces(boardState) {
 }
 
 function onCellClick(e) {
+
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('highlight-select', 'highlight-move');
+  });
+
   const row = Number(e.currentTarget.dataset.row);
   const col = Number(e.currentTarget.dataset.col);
   const dice = gameState.diceValue;
@@ -65,20 +70,15 @@ function onCellClick(e) {
 
 }
 
-
-
 function isForwardRow(row) {
-
   return row === 3 || row === 1;
 }
 
 function computeDestination(row, col, dice, piece, size) {
-
   if (!piece.hasMoved && dice !== 1) {
     showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
     return;
   }
-
 
   if (row === 0 && anyBlueInStartRow()) {
     showMessage(

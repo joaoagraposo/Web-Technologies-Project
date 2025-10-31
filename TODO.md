@@ -1,5 +1,5 @@
 # To Do List
-- When we select a piece and then another piece, the highlight does not disappear, being the two pieces highlighted.
+- ~~When we select a piece and then another piece, the highlight does not disappear, being the two pieces highlighted.~~
 - AI model, at least a random version
 - ~~When starting a new game, the message that was showed last, does not disappear~~
 - When starting a new game, the last dice number, does not disappear
