@@ -9,6 +9,8 @@ window.addEventListener('DOMContentLoaded', () => {
   rollDiceBtn.addEventListener('click', rollDice);
   passTurnBtn.addEventListener('click', passTurn);
   giveUpBtn.addEventListener('click', giveUp);
+
+  initScoreboard();
 });
 
 function startGame() {
@@ -28,5 +30,23 @@ function passTurn() {
 }
 
 function giveUp() {
-  showMessage("Jogador desistiu.");
+  if (!confirm("Tens a certeza que queres desistir?")) return;
+
+  showMessage("Jogador desistiu. O computador venceu!");
+  
+  // Disable further interactions
+  gameState.currentPlayer = null;
+
+  // Disable buttons
+  document.getElementById("rollDiceBtn").disabled = true;
+  document.getElementById("passTurnBtn").disabled = true;
+  document.getElementById("giveUpBtn").disabled = true;
+
+  // Optional: gray out the board
+  document.querySelectorAll(".cell").forEach(c => {
+    c.style.pointerEvents = "none";
+    c.style.opacity = "0.6";
+  });
+
+  saveScore("Humano", "Desistiu");
 }

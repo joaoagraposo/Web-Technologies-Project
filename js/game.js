@@ -32,6 +32,7 @@ function changeSize(delta) {
 
 function initGame(size) {
   showMessage("Novo Jogo Iniciado.");
+  resetGameUI();
   gameState.size = size;
   gameState.board = initPieces(size);
   gameState.currentPlayer = document.getElementById('firstPlayer').value;
@@ -43,6 +44,35 @@ function initGame(size) {
   renderPieces(gameState.board);
   document.getElementById('diceResult').innerText = `Lance o dado, ${gameState.currentPlayer}`;
 
+}
+
+function resetGameUI() {
+  // Re-enable buttons for the next match
+  document.getElementById("rollDiceBtn").disabled = false;
+  document.getElementById("passTurnBtn").disabled = false;
+  document.getElementById("giveUpBtn").disabled = false;
+
+  // Reactivate cells
+  document.querySelectorAll(".cell").forEach(c => {
+    c.style.pointerEvents = "auto";
+    c.style.opacity = "1";
+  });
+
+  // Reset state
+  gameState = {
+    size: 7,
+    currentPlayer: 'human',
+    board: [],
+    diceValue: null,
+    move: null,
+    extramove: null,
+    selectedPiece: null,
+    redPieces: new Map(),
+    bluePieces: new Map(),
+  };
+
+  document.getElementById('messageArea').innerText = '';
+  document.getElementById('diceResult').innerText = '';
 }
 
 function initPieces(size) {
@@ -116,7 +146,7 @@ function anyBlueInStartRow() {
 function anyRedInStartRow(){
   for (const [piece] of gameState.redPieces) {
     const pos = findPieceOnBoard(piece);
-    if (pos && pos.row === 3) return true;
+    if (pos && pos.row === 0) return true;
   }
   return false;
 }
