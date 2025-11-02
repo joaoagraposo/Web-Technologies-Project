@@ -9,13 +9,10 @@
 - ~~CheckWin() function~~ 
 - ~~CheckWin calls the saveScoreboard function.~~
 - ~~Game buttons should only work when game has started~~
-- Logic issue found, the second dice should be granted even if we cannot move. (RN if we didn't move any piece yet and we get 4/6 on the dice roll, we cannot move nor re-roll, which is not what is intended).
+- ~~Logic issue found, the second dice should be granted even if we cannot move. (RN if we didn't move any piece yet and we get 4/6 on the dice roll, we cannot move nor re-roll, which is not what is intended).~~
 - On the select "firstPlayer", the options should be jogador1/jogador2/ai, instead of human/ai, in order to implement, in the future, the PvP option. Didn't change this already because it is hardcoded in a lot of instances.
 - Refine the movement logic, as we are not following the correct behavior. Apparently we should be able to go back.
 
 ![alt text](image-2.png)
 
-- AI finally works but this happened:
 
-![alt text](image.png),
-![alt text](image-1.png)
