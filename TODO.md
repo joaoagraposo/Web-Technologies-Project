@@ -1,9 +1,11 @@
 # To Do List
 - ~~When we select a piece and then another piece, the highlight does not disappear, being the two pieces highlighted.~~
-- ~~AI model, at least a random version (URGENT)~~~
+- ~~AI model, at least a random version (URGENT)~~
 
 AI finally works but this happened:
 ![alt text](image.png)
+new issue:
+![alt text](image-1.png)
 
 - ~~When starting a new game, the message that was showed last, does not disappear~~
 - ~~When starting a new game, the last dice number, does not disappear~~
@@ -14,3 +16,6 @@ AI finally works but this happened:
 - ~~CheckWin() function~~ 
 - CheckWin calls the saveScoreboard function.
 - Game buttons should only work when game has started
+- Logic issue found, the second dice should be granted even if we cannot move. (RN if we didn't move any piece yet and we get 4/6 on the dice roll, we cannot move nor re-roll, which is not what is intended).
+
+- Refine the movement logic, as we are not following the correct behavior: ![alt text](image-2.png)

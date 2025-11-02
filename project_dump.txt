@@ -286,7 +286,13 @@ Arquivo: TODO.md
 
 # To Do List
 - ~~When we select a piece and then another piece, the highlight does not disappear, being the two pieces highlighted.~~
-- AI model, at least a random version (URGENT)
+- ~~AI model, at least a random version (URGENT)~~~
+
+AI finally works but this happened:
+![alt text](image.png)
+new issue:
+![alt text](image-1.png)
+
 - ~~When starting a new game, the message that was showed last, does not disappear~~
 - ~~When starting a new game, the last dice number, does not disappear~~
 - ~~If we only can make one move, but we selected other piece that cannot move due to the fact that the possible move (which, in fact, is not possible) is to the cell where the piece we can move is at, we get stuck, unnable to move.~~
@@ -483,19 +489,13 @@ function performAIMove(color, level) {
     showMessage(`IA (${color}) moveu uma peça.`);
     console.log(`AI executed move from [${from.row},${from.col}] to [${to.row},${to.col}]`);
 
-    // Clear dice info for next turn
-    gameState.diceValue = null;
-    document.getElementById('diceResult').innerText = '';
+  // Clear dice info for next turn
+  gameState.diceValue = null;
+  document.getElementById('diceResult').innerText = '';
 
-    if (gameState.extramove) {
-      gameState.extramove = false;
-      console.log("AI earned an extra move!");
-      showMessage("IA ganhou jogada extra!");
-      setTimeout(() => aiMove(), 1000);
-    } else {
-      console.log("=== AI TURN END (normal) ===\n");
-      nextTurn();
-    }
+  // Do not call nextTurn() here — applyMove() will handle it or start an extra move
+  console.log("=== AI TURN END ===\n");
+
   }, 800);
 }
 
@@ -782,14 +782,15 @@ function applyMove(move) {
 
   if (gameState.extramove) {
     if (gameState.currentPlayer === "ai") {
-      // Let the AI handle the extra move itself
+      // Consume the extra-move flag and immediately start another AI turn
+      gameState.extramove = false;
       showMessage(`IA ganhou jogada extra!`);
-      // Don't consume extramove flag — keep it true
       gameState.diceValue = null;
       document.getElementById('diceResult').innerText = '';
-      return;
+      console.log("AI earned an extra move → starting next AI roll...");
+      return setTimeout(() => aiMove(), 800);
     } else {
-      // Human player keeps their turn normally
+      // Human keeps their turn normally
       gameState.extramove = false;
       showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`);
       gameState.diceValue = null;
