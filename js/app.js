@@ -72,7 +72,19 @@ function showMessage(msg) {
 }
 
 function passTurn() {
-  if (typeof window.passTurn === "function") window.passTurn();
+  const color = gameState.currentColor;
+  if (gameState.extramove ===true){
+    gameState.extramove = false;
+    gameState.diceValue = null;
+    return;
+  } 
+  if (canAnyMove(color)) {
+    showMessage("Ainda tens uma jogada válida, não podes passar.");
+    return;
+  }
+
+  showMessage("Vez passada.");
+  nextTurn();
 }
 
 function giveUp() {
