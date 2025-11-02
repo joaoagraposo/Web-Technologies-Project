@@ -1,7 +1,6 @@
-// ai.js — with detailed console logging
-
+// ai.js
 function aiMove() {
-  // Safety: make sure it's still the AI's turn
+  // safety turn check
   if (gameState.currentPlayer !== "ai") return;
 
   // Reset any leftover flags from the previous turn

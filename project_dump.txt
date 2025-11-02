@@ -10,12 +10,12 @@ Arquivo: index.html
   <meta charset="UTF-8">
   <title>Tâb</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="js/app.js" defer></script>
   <script src="js/board.js" defer></script>
   <script src="js/game.js" defer></script>
   <script src="js/dice.js" defer></script>
   <script src="js/ai.js" defer></script>
   <script src="js/scoreboard.js" defer></script>
+  <script src="js/app.js" defer></script>
 </head>
 <body>
   <header>
@@ -67,7 +67,7 @@ Arquivo: index.html
       <div id="messageArea"></div>
     </section>
 
-    <section id="panels" class="hidden">
+    <section id="panels">
       <div id="rulesPanel" class="panel hidden">
         <h2>Regras do Jogo</h2>
         <p><strong>Descrição geral:</strong> Tâb é um jogo de tabuleiro para dois jogadores. 
@@ -312,24 +312,24 @@ Arquivo: TODO.md
 # To Do List
 - ~~When we select a piece and then another piece, the highlight does not disappear, being the two pieces highlighted.~~
 - ~~AI model, at least a random version (URGENT)~~
-
-AI finally works but this happened:
-![alt text](image.png)
-new issue:
-![alt text](image-1.png)
-
 - ~~When starting a new game, the message that was showed last, does not disappear~~
 - ~~When starting a new game, the last dice number, does not disappear~~
 - ~~If we only can make one move, but we selected other piece that cannot move due to the fact that the possible move (which, in fact, is not possible) is to the cell where the piece we can move is at, we get stuck, unnable to move.~~
-- On the select "firstPlayer", the options should be jogador1/jogador2/ai, instead of human/ai, in order to implement, in the future, the PvP option. Didn't change this already because it is hardcoded in a lot of instances. agree vou alterar proximo commit
 - ~~Simple but working Scoreboard~~
 - Scoring function to improve scoreboard
 - ~~CheckWin() function~~ 
-- CheckWin calls the saveScoreboard function.
-- Game buttons should only work when game has started
+- ~~CheckWin calls the saveScoreboard function.~~
+- ~~Game buttons should only work when game has started~~
 - Logic issue found, the second dice should be granted even if we cannot move. (RN if we didn't move any piece yet and we get 4/6 on the dice roll, we cannot move nor re-roll, which is not what is intended).
+- On the select "firstPlayer", the options should be jogador1/jogador2/ai, instead of human/ai, in order to implement, in the future, the PvP option. Didn't change this already because it is hardcoded in a lot of instances.
+- Refine the movement logic, as we are not following the correct behavior. Apparently we should be able to go back.
 
-- Refine the movement logic, as we are not following the correct behavior: ![alt text](image-2.png)
+![alt text](image-2.png)
+
+- AI finally works but this happened:
+
+![alt text](image.png),
+![alt text](image-1.png)
 
 
 ================================================================================
@@ -546,41 +546,63 @@ function performAIMove(color, level) {
 Arquivo: js/app.js
 ================================================================================
 
-window.addEventListener('DOMContentLoaded', () => {
-  const startBtn = document.getElementById('startBtn');
-  const rollDiceBtn = document.getElementById('rollDiceBtn');
-  const passTurnBtn = document.getElementById('passTurnBtn');
-  const giveUpBtn = document.getElementById('giveUpBtn');
-  const showRulesBtn = document.getElementById('showRulesBtn');
-  const showScoresBtn = document.getElementById('showScoresBtn');
-  const closePanelBtns = document.querySelectorAll('.closePanel');
+window.addEventListener("DOMContentLoaded", () => {
+  // Botões
+  const startBtn = document.getElementById("startBtn");
+  const rollDiceBtn = document.getElementById("rollDiceBtn");
+  const passTurnBtn = document.getElementById("passTurnBtn");
+  const giveUpBtn = document.getElementById("giveUpBtn");
+  const showRulesBtn = document.getElementById("showRulesBtn");
+  const showScoresBtn = document.getElementById("showScoresBtn");
+  const closeButtons = document.querySelectorAll(".closePanel");
 
-  startBtn.addEventListener('click', startGame);
-  rollDiceBtn.addEventListener('click', rollDice);
-  passTurnBtn.addEventListener('click', passTurn);
-  giveUpBtn.addEventListener('click', giveUp);
-  showRulesBtn.addEventListener('click', () => {
-    document.getElementById('rulesPanel').classList.remove('hidden');
-  });
-  showScoresBtn.addEventListener('click', () => {
-    loadScores();
-    document.getElementById('scoresPanel').classList.remove('hidden');
+  //Bloquear botões de jogo até iniciar
+  rollDiceBtn.disabled = true;
+  passTurnBtn.disabled = true;
+  giveUpBtn.disabled = true;
+  
+  // Eventos principais
+  startBtn.addEventListener("click", startGame);
+  rollDiceBtn.addEventListener("click", rollDice);
+  passTurnBtn.addEventListener("click", passTurn);
+  giveUpBtn.addEventListener("click", giveUp);
+
+  // Painel de regras
+  showRulesBtn.addEventListener("click", () => {
+    const p = document.getElementById("rulesPanel");
+    if (p) p.classList.remove("hidden");
   });
 
-  closePanelBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      btn.closest('.panel').classList.add('hidden');
+  // Painel de classificações
+  showScoresBtn.addEventListener("click", () => {
+    const p = document.getElementById("scoresPanel");
+    if (p) {
+      if (typeof loadScores === "function") loadScores();
+      p.classList.remove("hidden");
+    }
+  });
+
+  // Fechar painéis
+  closeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const panel = btn.closest(".panel");
+      if (panel) panel.classList.add("hidden");
     });
   });
 
-  initScoreboard();
+  // Inicializar tabela de pontuações
+  if (typeof initScoreboard === "function") initScoreboard();
+
+  console.log("App initialized");
 });
 
+
+// Funções do jogo
 function startGame() {
-  const size = parseInt(document.getElementById('boardSize').value);
-  const firstPlayer = document.getElementById('firstPlayer').value; // 'human' | 'ai'
-  const humanColor = document.getElementById('humanColor').value;   // 'blue' | 'red'
-  const aiColor = humanColor === 'blue' ? 'red' : 'blue';
+  const size = parseInt(document.getElementById("boardSize").value);
+  const firstPlayer = document.getElementById("firstPlayer").value;
+  const humanColor = document.getElementById("humanColor").value;
+  const aiColor = humanColor === "blue" ? "red" : "blue";
 
   createBoard(size);
 
@@ -594,36 +616,30 @@ function startGame() {
 }
 
 function showMessage(msg) {
-  document.getElementById('messageArea').innerText = msg;
+  document.getElementById("messageArea").innerText = msg;
 }
 
 function passTurn() {
-  if (typeof window.passTurn === 'function') {
-    window.passTurn();
-  }
+  if (typeof window.passTurn === "function") window.passTurn();
 }
 
 function giveUp() {
   if (!confirm("Tens a certeza que queres desistir?")) return;
 
   showMessage("Jogador desistiu. O computador venceu!");
-
   gameState.currentPlayer = null;
-
 
   document.getElementById("rollDiceBtn").disabled = true;
   document.getElementById("passTurnBtn").disabled = true;
   document.getElementById("giveUpBtn").disabled = true;
 
-  // gray out the board, as the game has ended
   document.querySelectorAll(".cell").forEach(c => {
     c.style.pointerEvents = "none";
     c.style.opacity = "0.6";
   });
 
-  saveScore("Humano", "Desistiu");
+  if (typeof saveScore === "function") saveScore("Humano", "Desistiu");
 }
-
 
 
 ================================================================================
