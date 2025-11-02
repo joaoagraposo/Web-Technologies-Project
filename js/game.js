@@ -107,6 +107,9 @@ function initPieces(size) {
   return board;
 }
 
+function getAdversaryMapColor(color){
+  return color === 'blue' ? gameState.redPieces : gameState.bluePieces;
+}
 
 function getPiecesMapByColor(color) {
   return color === 'blue' ? gameState.bluePieces : gameState.redPieces;

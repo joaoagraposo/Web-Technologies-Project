@@ -180,7 +180,10 @@ function applyMove(move) {
     return;
   }
 
-  // Update board and map
+  if(target && target.color !== piece.color){
+    const adversaryMap = getAdversaryMapColor(piece.color);
+    adversaryMap.delete(target);
+  }
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
