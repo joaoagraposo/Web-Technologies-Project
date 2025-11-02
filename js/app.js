@@ -8,6 +8,11 @@ window.addEventListener("DOMContentLoaded", () => {
   const showScoresBtn = document.getElementById("showScoresBtn");
   const closeButtons = document.querySelectorAll(".closePanel");
 
+  //Bloquear botões de jogo até iniciar
+  rollDiceBtn.disabled = true;
+  passTurnBtn.disabled = true;
+  giveUpBtn.disabled = true;
+  
   // Eventos principais
   startBtn.addEventListener("click", startGame);
   rollDiceBtn.addEventListener("click", rollDice);
