@@ -192,6 +192,7 @@ function applyMove(move) {
 
   if (gameState.extramove) {
     gameState.extramove = false;
+    showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`)
     gameState.diceValue = null;
     document.getElementById('diceResult').innerText = '';
     return;

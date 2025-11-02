@@ -51,7 +51,7 @@ function giveUp() {
   document.getElementById("passTurnBtn").disabled = true;
   document.getElementById("giveUpBtn").disabled = true;
 
-  // Optional: gray out the board
+  // gray out the board, as the game has ended
   document.querySelectorAll(".cell").forEach(c => {
     c.style.pointerEvents = "none";
     c.style.opacity = "0.6";
