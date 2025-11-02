@@ -78,10 +78,7 @@ function onCellClick(e) {
   if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
 
-/* 
-   Movement Logic 
-   Blue and Red now move in mirrored directions (vertically and horizontally).
-*/
+
 
 function isForwardRow(row, color) {
   // For blue: rows 3 & 1 move left→right.
@@ -250,14 +247,3 @@ function canAnyMove(color) {
   return false;
 }
 
-function passTurn() {
-  const color = gameState.currentColor;
-
-  if (canAnyMove(color)) {
-    showMessage("Ainda tens uma jogada válida, não podes passar.");
-    return;
-  }
-
-  showMessage("Vez passada.");
-  nextTurn();
-}
