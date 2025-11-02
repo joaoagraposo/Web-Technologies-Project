@@ -147,3 +147,37 @@ function nextTurn() {
   }
 }
 
+function checkWin() {
+  let hasBlue = false;
+  let hasRed = false;
+
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < gameState.size; c++) {
+      const p = gameState.board[r][c];
+      if (!p) continue;
+      if (p.color === "blue") hasBlue = true;
+      if (p.color === "red") hasRed = true;
+    }
+  }
+
+  if (!hasBlue || !hasRed) {
+    const winnerColor = hasBlue ? "blue" : "red";
+    const winnerName =
+      winnerColor === gameState.players.human ? "Humano" : "Computador";
+
+    showMessage(`Jogo terminado! ${winnerName} venceu!`);
+    console.log(`Winner: ${winnerName}`);
+
+    document.getElementById("rollDiceBtn").disabled = true;
+    document.getElementById("passTurnBtn").disabled = true;
+    document.getElementById("giveUpBtn").disabled = true;
+    document.querySelectorAll(".cell").forEach((c) => {
+      c.style.pointerEvents = "none";
+      c.style.opacity = "0.6";
+    });
+
+    saveScore(winnerName, "Vitória");
+    return true;
+  }
+  return false;
+}

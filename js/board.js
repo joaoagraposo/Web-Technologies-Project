@@ -190,6 +190,8 @@ function applyMove(move) {
     c.classList.remove('highlight-select', 'highlight-move');
   });
 
+  if (checkWin()) return;
+
   if (gameState.extramove) {
     gameState.extramove = false;
     showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`)

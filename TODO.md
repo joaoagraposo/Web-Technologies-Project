@@ -7,5 +7,6 @@
 - On the select "firstPlayer", the options should be jogador1/jogador2/ai, instead of human/ai, in order to implement, in the future, the PvP option. Didn't change this already because it is hardcoded in a lot of instances. agree vou alterar proximo commit
 - ~~Simple but working Scoreboard~~
 - Scoring function to improve scoreboard
-- CheckWin() that will call the saveScoreboard function.
+- ~~CheckWin() function~~ 
+- CheckWin calls the saveScoreboard function.
 - Game buttons should only work when game has started

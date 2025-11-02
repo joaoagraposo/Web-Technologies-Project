@@ -388,83 +388,16 @@ header {
 Arquivo: js/ai.js
 ================================================================================
 
-// -----------------------------------------------------------------------------
-// ai.js — versão estável com correção de direção e loop infinito
-// -----------------------------------------------------------------------------
+// ai.js
 function aiMove() {
-  console.log("AI is playing...");
   showMessage("IA a jogar...");
-
-  // 1️⃣  Garantir dado
-  if (gameState.diceValue === null) rollDice();
-
-  const dice = gameState.diceValue;
-  const aiColor = gameState.players.ai;
-  const path = gameState.paths?.[aiColor];
-  const dir = aiColor === "red" ? -1 : +1;
-  const map = getPiecesMapByColor(aiColor);
-  const validMoves = [];
-
-  console.log("Dice number:", dice);
-
-  // 2️⃣  Procurar jogadas válidas
-  for (const [piece, meta] of map) {
-    if (!piece.hasMoved && dice !== 1) continue;
-
-    let index = path.findIndex(p => p.row === meta.row && p.col === meta.col);
-    if (index === -1 && !piece.hasMoved && dice === 1) index = dir === 1 ? 0 : path.length - 1;
-    if (index === -1) continue;
-
-    let nextIndex = index + dir * dice;
-    nextIndex = ((nextIndex % path.length) + path.length) % path.length;
-
-    const dest = path[nextIndex];
-    const target = gameState.board[dest.row][dest.col];
-    if (target && target.color === aiColor) continue; // própria peça bloqueia
-
-    validMoves.push({
-      from: { row: meta.row, col: meta.col },
-      to: dest,
-      piece
-    });
-  }
-
-  // 3️⃣  Se não houver movimentos, passa vez
-  if (validMoves.length === 0) {
-    console.log("AI cannot move. Passing turn.");
-    showMessage(`IA passou a vez (dado ${dice}).`);
-    setTimeout(() => passTurn(), 1000);
-    return;
-  }
-
-  // 4️⃣  Preferir capturas
-  const captureMoves = validMoves.filter(m => {
-    const t = gameState.board[m.to.row][m.to.col];
-    return t && t.color !== aiColor;
-  });
-
-  const move = (captureMoves.length ? captureMoves : validMoves)
-    [Math.floor(Math.random() * (captureMoves.length ? captureMoves.length : validMoves.length))];
-
-  console.log(`AI move from [${move.from.row},${move.from.col}] → [${move.to.row},${move.to.col}]`);
-
-  // 5️⃣  Executar a jogada
-  applyMove(move);
-  showMessage(`IA (${aiColor}) jogou (dado ${dice}).`);
-
-  // 6️⃣  Tratar jogadas extra UMA VEZ
-  if ([1, 4, 6].includes(dice)) {
-    console.log(`AI ganhou lançamento extra (${dice}).`);
-    gameState.diceValue = null;
-    gameState.extramove = false;
-    setTimeout(aiMove, 1000);
-    return;
-  }
-
-  gameState.diceValue = null;
-  gameState.extramove = false;
-  setTimeout(() => nextTurn(), 1500);
+  setTimeout(() => {
+    // TODO: Selecionar peça e mover de forma aleatória válida
+    showMessage("IA fez a jogada.");
+    nextTurn();
+  }, 1000);
 }
+
 
 
 ================================================================================
@@ -524,7 +457,7 @@ function giveUp() {
   document.getElementById("passTurnBtn").disabled = true;
   document.getElementById("giveUpBtn").disabled = true;
 
-  // Optional: gray out the board
+  // gray out the board, as the game has ended
   document.querySelectorAll(".cell").forEach(c => {
     c.style.pointerEvents = "none";
     c.style.opacity = "0.6";
@@ -539,76 +472,49 @@ function giveUp() {
 Arquivo: js/board.js
 ================================================================================
 
-// -----------------------------------------------------------------------------
-// Board creation & rendering
-// -----------------------------------------------------------------------------
+// board.js
 function createBoard(size) {
-  const board = document.getElementById("board");
-  board.innerHTML = "";
+  const board = document.getElementById('board');
+  board.innerHTML = '';
   board.style.gridTemplateColumns = `repeat(${size}, 50px)`;
 
   for (let row = 0; row < 4; row++) {
     for (let col = 0; col < size; col++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
       cell.dataset.row = row;
       cell.dataset.col = col;
-      cell.addEventListener("click", onCellClick);
+      cell.addEventListener('click', onCellClick);
       board.appendChild(cell);
     }
   }
 }
 
 function renderPieces(boardState) {
-  const cells = document.querySelectorAll(".cell");
-  cells.forEach((cell) => {
+  const cells = document.querySelectorAll('.cell');
+  cells.forEach(cell => {
     const r = Number(cell.dataset.row);
     const c = Number(cell.dataset.col);
-    cell.innerHTML = "";
-    cell.classList.remove("highlight-select", "highlight-move");
+
+    cell.innerHTML = '';
+    cell.classList.remove('highlight-select', 'highlight-move');
 
     const occupant = boardState[r][c];
     if (!occupant) return;
 
-    const color = occupant.color;
-    const token = document.createElement("div");
+    const color = typeof occupant === 'string' ? occupant : occupant.color;
+    const token = document.createElement('div');
     token.className = `piece ${color}`;
-    token.setAttribute("aria-label", `${color} piece`);
+    token.setAttribute('aria-label', `${color} piece`);
+
     cell.appendChild(token);
   });
 }
 
-// -----------------------------------------------------------------------------
-// Path generation - dynamic circuit based on size
-// -----------------------------------------------------------------------------
-function buildCircularPaths(size) {
-  const pathRed = [];
-  for (let r = 0; r < 4; r++) {
-    const cols =
-      r % 2 === 0
-        ? [...Array(size).keys()] // left → right
-        : [...Array(size).keys()].reverse(); // right → left
-    cols.forEach((c) => pathRed.push({ row: r, col: c }));
-  }
-
-  // pathBlue is the reversed circular counterpart of pathRed
-  const pathBlue = [...pathRed].slice().reverse();
-
-  gameState.paths = {
-    red: pathRed,
-    blue: pathBlue,
-  };
-
-  console.log("Paths generated:", { pathRed, pathBlue });
-}
-
-// -----------------------------------------------------------------------------
-// Cell interactions
-// -----------------------------------------------------------------------------
 function onCellClick(e) {
-  document.querySelectorAll(".cell").forEach((c) =>
-    c.classList.remove("highlight-select", "highlight-move")
-  );
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('highlight-select', 'highlight-move');
+  });
 
   const row = Number(e.currentTarget.dataset.row);
   const col = Number(e.currentTarget.dataset.col);
@@ -616,105 +522,124 @@ function onCellClick(e) {
   const piece = gameState.board[row][col];
 
   if (dice === null) return showMessage("Ainda não lançaste o dado.");
-  if (gameState.currentPlayer !== "human")
-    return showMessage("Não é a tua vez.");
+  if (gameState.currentPlayer !== 'human') return showMessage("Não é a tua vez.");
 
   const humanColor = gameState.players.human;
 
   if (gameState.movePreview) {
     const { to } = gameState.movePreview;
+
     if (to.row === row && to.col === col) {
+      const target = gameState.board[row][col];
+      if (target && target.color === humanColor) {
+        gameState.movePreview = null;
+        computeDestination(row, col, dice, target, gameState.size);
+        return;
+      }
+
       return applyMove(gameState.movePreview);
     }
+
     gameState.movePreview = null;
   }
 
   if (piece && piece.color === humanColor) {
-    computeDestination(row, col, dice, piece, false);
+    computeDestination(row, col, dice, piece, gameState.size);
     return;
   }
 
   if (!piece) return showMessage("Casa vazia.");
-  if (piece.color !== humanColor)
-    return showMessage("Só podes mover as tuas peças.");
+  if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
+function isForwardRow(row) {
+  return row === 3 || row === 1;
+}
+
+function evenMove(row, col, size) {
+  if (col + 1 < size) {
+    return { row, col: col + 1 };
+  }
+  return { row: row - 1, col };
+}
+
+function oddMove(row, col, size) {
+  if (col - 1 >= 0) {
+    return { row, col: col - 1 };
+  }
+  return { row: row - 1, col };
+}
+
 function highlightMove(fromRow, fromCol, toRow, toCol) {
   const originCell = document.querySelector(
     `.cell[data-row="${fromRow}"][data-col="${fromCol}"]`
   );
-  if (originCell) originCell.classList.add("highlight-select");
+  if (originCell) originCell.classList.add('highlight-select');
 
   const destCell = document.querySelector(
     `.cell[data-row="${toRow}"][data-col="${toCol}"]`
   );
-  if (destCell) destCell.classList.add("highlight-move");
+  if (destCell) destCell.classList.add('highlight-move');
 }
 
-// -----------------------------------------------------------------------------
-// Compute movement using the circular indexed path
-// -----------------------------------------------------------------------------
-function computeDestination(row, col, dice, piece, silent = false) {
+function computeDestination(row, col, dice, piece, size, silent = false) {
   const color = piece.color;
-  const path = gameState.paths?.[color];
-  if (!path) {
-    console.warn("No path for color", color);
-    return null;
-  }
+  const map = getPiecesMapByColor(color);
 
-  // Jogada inicial requer 1
   if (!piece.hasMoved && dice !== 1) {
-    if (!silent)
-      showMessage("Esta peça ainda não se mexeu, precisa de 1 no dado.");
+    if (!silent) showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
     return null;
   }
 
-  // Encontrar índice atual
-  let index = path.findIndex((p) => p.row === row && p.col === col);
-  if (index === -1 && !piece.hasMoved && dice === 1) index = 0;
-
-  // Calcular destino circular
-  let nextIndex = (index + dice) % path.length;
-  if (nextIndex < 0) nextIndex += path.length;
-
-  const dest = path[nextIndex];
-  const target = gameState.board[dest.row][dest.col];
-
-  if (target && target.color === color) {
-    if (!silent) showMessage("Casa ocupada pela tua peça.");
+  const isOppositeRow = (color === 'blue') ? (row === 0) : (row === 3);
+  if (isOppositeRow && anyInStartRow(color)) {
+    if (!silent) showMessage('Ainda tens peças na linha inicial, não podes avançar esta.');
     return null;
+  }
+
+  let curRow = row;
+  let curCol = col;
+  let steps = dice;
+
+  while (steps > 0) {
+    if (isForwardRow(curRow)) {
+      ({ row: curRow, col: curCol } = evenMove(curRow, curCol, size));
+    } else {
+      ({ row: curRow, col: curCol } = oddMove(curRow, curCol, size));
+    }
+    steps--;
+  }
+
+  const meta = map.get(piece);
+  if (meta) {
+    meta.destRow = curRow;
+    meta.destCol = curCol;
+    meta.hasMove = true;
   }
 
   if (!silent) {
-    highlightMove(row, col, dest.row, dest.col);
+    highlightMove(row, col, curRow, curCol);
+
     gameState.movePreview = {
       from: { row, col },
-      to: dest,
+      to: { row: curRow, col: curCol },
       piece,
     };
   }
 
-  return dest;
+  return { row: curRow, col: curCol };
 }
 
-// -----------------------------------------------------------------------------
-// Apply move & update state
-// -----------------------------------------------------------------------------
 function applyMove(move) {
   const { from, to, piece } = move;
-  const target = gameState.board[to.row][to.col];
 
-  if (target && target.color !== piece.color) {
-    // captura
-    gameState.board[to.row][to.col] = null;
-  } else if (target && target.color === piece.color) {
-    showMessage("Casa ocupada pela tua peça.");
+  const target = gameState.board[to.row][to.col];
+  if (target && target.color === piece.color) {
+    showMessage('Casa ocupada pela tua peça.');
     return;
   }
 
+  //atualizar board e map
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
@@ -723,101 +648,67 @@ function applyMove(move) {
   if (meta) {
     meta.row = to.row;
     meta.col = to.col;
+    meta.destRow = null;
+    meta.destCol = null;
+    meta.hasMove = false;
   }
 
   piece.hasMoved = true;
+
   gameState.movePreview = null;
 
   renderPieces(gameState.board);
-  document.querySelectorAll(".cell").forEach((c) =>
-    c.classList.remove("highlight-select", "highlight-move")
-  );
 
-  if (checkWin()) return;
+  // limpa highlights
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('highlight-select', 'highlight-move');
+  });
 
-  // Jogadas extra (1, 4, 6)
-  if ([1, 4, 6].includes(gameState.diceValue)) {
-    showMessage(`Saiu ${gameState.diceValue}! Jogas de novo.`);
+  if (gameState.extramove) {
+    gameState.extramove = false;
+    showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`)
     gameState.diceValue = null;
-    document.getElementById("diceResult").innerText = "";
+    document.getElementById('diceResult').innerText = '';
     return;
   }
 
   nextTurn();
 }
 
-// -----------------------------------------------------------------------------
-// Check win
-// -----------------------------------------------------------------------------
-function checkWin() {
-  let hasBlue = false;
-  let hasRed = false;
 
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < gameState.size; c++) {
-      const p = gameState.board[r][c];
-      if (!p) continue;
-      if (p.color === "blue") hasBlue = true;
-      if (p.color === "red") hasRed = true;
-    }
-  }
-
-  if (!hasBlue || !hasRed) {
-    const winnerColor = hasBlue ? "blue" : "red";
-    const winnerName =
-      winnerColor === gameState.players.human ? "Humano" : "Computador";
-
-    showMessage(`Jogo terminado! ${winnerName} venceu!`);
-    console.log(`Winner: ${winnerName}`);
-
-    document.getElementById("rollDiceBtn").disabled = true;
-    document.getElementById("passTurnBtn").disabled = true;
-    document.getElementById("giveUpBtn").disabled = true;
-    document.querySelectorAll(".cell").forEach((c) => {
-      c.style.pointerEvents = "none";
-      c.style.opacity = "0.6";
-    });
-
-    saveScore(winnerName, "Vitória");
-    return true;
-  }
-  return false;
-}
-
-// -----------------------------------------------------------------------------
-// Pass turn if no valid move
-// -----------------------------------------------------------------------------
 function canAnyMove(color) {
   const dice = gameState.diceValue;
   if (dice === null) return false;
 
   const map = getPiecesMapByColor(color);
+
   for (const [piece, meta] of map) {
-    const dest = computeDestination(
-      meta.row,
-      meta.col,
-      dice,
-      piece,
-      true
-    );
+    const dest = computeDestination(meta.row, meta.col, dice, piece, gameState.size, true);
     if (!dest) continue;
-    const target = gameState.board?.[dest.row]?.[dest.col];
-    if (!target || target.color !== color) return true;
+
+    const target = gameState.board[dest.row][dest.col];
+    if (!target || target.color !== color) {
+      return true; 
+    }
   }
+
   return false;
 }
 
 function passTurn() {
   const color = gameState.currentColor;
+
   if (canAnyMove(color)) {
     showMessage("Ainda tens uma jogada válida, não podes passar.");
     return;
   }
+
   showMessage("Vez passada.");
   nextTurn();
 }
 
-window.passTurn = passTurn;
+
+
 
 
 ================================================================================
@@ -902,9 +793,6 @@ function initGame(size, config) {
   gameState.size = size;
   gameState.board = initPieces(size);
 
-  // gerar circuitos dinâmicos
-  buildCircularPaths(size);
-
   // quem começa
   gameState.currentPlayer = config.firstPlayer;
   gameState.players = {
@@ -967,7 +855,7 @@ function getPiecesMapByColor(color) {
 function getStartRowByColor(color) {
   return color === 'blue' ? 3 : 0;
 }
- 
+
 
 function anyInStartRow(color) {
   const map = getPiecesMapByColor(color);
