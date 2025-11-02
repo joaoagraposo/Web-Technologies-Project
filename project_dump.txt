@@ -293,7 +293,8 @@ Arquivo: TODO.md
 - On the select "firstPlayer", the options should be jogador1/jogador2/ai, instead of human/ai, in order to implement, in the future, the PvP option. Didn't change this already because it is hardcoded in a lot of instances. agree vou alterar proximo commit
 - ~~Simple but working Scoreboard~~
 - Scoring function to improve scoreboard
-- CheckWin() that will call the saveScoreboard function.
+- ~~CheckWin() function~~ 
+- CheckWin calls the saveScoreboard function.
 - Game buttons should only work when game has started
 
 
@@ -388,16 +389,115 @@ header {
 Arquivo: js/ai.js
 ================================================================================
 
-// ai.js
+// ai.js — with detailed console logging
+
 function aiMove() {
+  // Safety: make sure it's still the AI's turn
+  if (gameState.currentPlayer !== "ai") return;
+
+  // Reset any leftover flags from the previous turn
+  gameState.extramove = false;
+  
+  const aiColor = gameState.players.ai;
+  console.log(`\n=== AI TURN START (${aiColor.toUpperCase()}) ===`);
+
   showMessage("IA a jogar...");
+
+  // Give a short delay for realism
   setTimeout(() => {
-    // TODO: Selecionar peça e mover de forma aleatória válida
-    showMessage("IA fez a jogada.");
-    nextTurn();
-  }, 1000);
+    // Roll the dice if not rolled yet
+    if (gameState.diceValue === null) {
+      rollDice();
+      console.log(`AI rolled the dice: ${gameState.diceValue}`);
+    } else {
+      console.log(`AI reusing dice value: ${gameState.diceValue}`);
+    }
+
+    const level = document.getElementById('aiLevel').value; // 'easy' | 'medium'
+
+    // Wait briefly so dice result displays in the UI
+    setTimeout(() => performAIMove(aiColor, level), 600);
+  }, 600);
 }
 
+function performAIMove(color, level) {
+  if (!gameState || gameState.currentPlayer !== 'ai') return;
+
+  const dice = gameState.diceValue;
+  console.log(`AI computing possible moves — Dice value: ${dice}`);
+
+  const map = getPiecesMapByColor(color);
+  const possibleMoves = [];
+
+  // Compute valid moves
+  for (const [piece, meta] of map) {
+    const dest = computeDestination(meta.row, meta.col, dice, piece, gameState.size, true);
+    if (!dest) continue;
+
+    const target = gameState.board[dest.row][dest.col];
+    if (!target || target.color !== color) {
+      possibleMoves.push({
+        from: { row: meta.row, col: meta.col },
+        to: dest,
+        piece,
+        capture: target && target.color !== color
+      });
+    }
+  }
+
+  // If no valid moves, AI passes automatically
+  if (possibleMoves.length === 0) {
+    console.log("AI could not make any valid move. Passing turn...");
+    showMessage("IA não tem jogadas válidas. Passa a vez.");
+    gameState.diceValue = null;
+    gameState.extramove = false;
+    console.log("=== AI TURN END (pass) ===\n");
+    return nextTurn();
+  }
+
+  // Select move based on difficulty
+  let chosenMove;
+  if (level === "medium") {
+    const captureMoves = possibleMoves.filter(m => m.capture);
+    chosenMove = captureMoves.length > 0
+      ? captureMoves[Math.floor(Math.random() * captureMoves.length)]
+      : possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+  } else {
+    // easy: fully random
+    chosenMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+  }
+
+  const { from, to, capture } = chosenMove;
+  console.log(
+    `AI chose move: (${from.row},${from.col}) → (${to.row},${to.col}) ${
+      capture ? "[capture]" : ""
+    }`
+  );
+
+  // Visual preview (short highlight)
+  highlightMove(from.row, from.col, to.row, to.col);
+
+  // Execute chosen move
+  setTimeout(() => {
+    applyMove(chosenMove);
+    showMessage(`IA (${color}) moveu uma peça.`);
+    console.log(`AI executed move from [${from.row},${from.col}] to [${to.row},${to.col}]`);
+
+    // Clear dice info for next turn
+    gameState.diceValue = null;
+    document.getElementById('diceResult').innerText = '';
+
+    if (gameState.extramove) {
+      gameState.extramove = false;
+      console.log("AI earned an extra move!");
+      showMessage("IA ganhou jogada extra!");
+      setTimeout(() => aiMove(), 1000);
+    } else {
+      console.log("=== AI TURN END (normal) ===\n");
+      nextTurn();
+    }
+  }, 800);
+}
 
 
 ================================================================================
@@ -552,22 +652,41 @@ function onCellClick(e) {
   if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
 
-function isForwardRow(row) {
-  return row === 3 || row === 1;
+/* 
+   Movement Logic 
+   Blue and Red now move in mirrored directions (vertically and horizontally).
+*/
+
+function isForwardRow(row, color) {
+  // For blue: rows 3 & 1 move left→right.
+  // For red:  rows 0 & 2 move right→left (mirror).
+  if (color === 'blue') return row === 3 || row === 1;
+  return row === 0 || row === 2;
 }
 
-function evenMove(row, col, size) {
-  if (col + 1 < size) {
-    return { row, col: col + 1 };
-  }
-  return { row: row - 1, col };
-}
+function moveStep(row, col, size, color) {
+  const forward = isForwardRow(row, color);
+  const dir = color === 'red' ? -1 : 1;
 
-function oddMove(row, col, size) {
-  if (col - 1 >= 0) {
-    return { row, col: col - 1 };
+  if (forward) {
+    // "Forward" rows move horizontally
+    const nextCol = col + dir;
+    const atEdge = dir === 1 ? nextCol >= size : nextCol < 0;
+    if (!atEdge) return { row, col: nextCol };
+
+    // reached end of row → go vertically
+    const nextRow = color === 'blue' ? row - 1 : row + 1;
+    return { row: nextRow, col };
+  } else {
+    // "Backward" rows move the opposite way
+    const nextCol = col - dir;
+    const atEdge = dir === 1 ? nextCol < 0 : nextCol >= size;
+    if (!atEdge) return { row, col: nextCol };
+
+    // reached end of row → go vertically
+    const nextRow = color === 'blue' ? row - 1 : row + 1;
+    return { row: nextRow, col };
   }
-  return { row: row - 1, col };
 }
 
 function highlightMove(fromRow, fromCol, toRow, toCol) {
@@ -602,11 +721,7 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
   let steps = dice;
 
   while (steps > 0) {
-    if (isForwardRow(curRow)) {
-      ({ row: curRow, col: curCol } = evenMove(curRow, curCol, size));
-    } else {
-      ({ row: curRow, col: curCol } = oddMove(curRow, curCol, size));
-    }
+    ({ row: curRow, col: curCol } = moveStep(curRow, curCol, size, color));
     steps--;
   }
 
@@ -639,7 +754,7 @@ function applyMove(move) {
     return;
   }
 
-  //atualizar board e map
+  // Update board and map
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
@@ -654,27 +769,37 @@ function applyMove(move) {
   }
 
   piece.hasMoved = true;
-
   gameState.movePreview = null;
 
   renderPieces(gameState.board);
 
-  // limpa highlights
+  // Clear highlights
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
 
-  if (gameState.extramove) {
-    gameState.extramove = false;
-    showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`)
-    gameState.diceValue = null;
-    document.getElementById('diceResult').innerText = '';
-    return;
-  }
+  if (checkWin()) return;
 
+  if (gameState.extramove) {
+    if (gameState.currentPlayer === "ai") {
+      // Let the AI handle the extra move itself
+      showMessage(`IA ganhou jogada extra!`);
+      // Don't consume extramove flag — keep it true
+      gameState.diceValue = null;
+      document.getElementById('diceResult').innerText = '';
+      return;
+    } else {
+      // Human player keeps their turn normally
+      gameState.extramove = false;
+      showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`);
+      gameState.diceValue = null;
+      document.getElementById('diceResult').innerText = '';
+      return;
+    }
+  }
+  
   nextTurn();
 }
-
 
 function canAnyMove(color) {
   const dice = gameState.diceValue;
@@ -688,7 +813,7 @@ function canAnyMove(color) {
 
     const target = gameState.board[dest.row][dest.col];
     if (!target || target.color !== color) {
-      return true; 
+      return true;
     }
   }
 
@@ -706,9 +831,6 @@ function passTurn() {
   showMessage("Vez passada.");
   nextTurn();
 }
-
-
-
 
 
 ================================================================================
@@ -887,7 +1009,40 @@ function nextTurn() {
   }
 }
 
+function checkWin() {
+  let hasBlue = false;
+  let hasRed = false;
 
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < gameState.size; c++) {
+      const p = gameState.board[r][c];
+      if (!p) continue;
+      if (p.color === "blue") hasBlue = true;
+      if (p.color === "red") hasRed = true;
+    }
+  }
+
+  if (!hasBlue || !hasRed) {
+    const winnerColor = hasBlue ? "blue" : "red";
+    const winnerName =
+      winnerColor === gameState.players.human ? "Humano" : "Computador";
+
+    showMessage(`Jogo terminado! ${winnerName} venceu!`);
+    console.log(`Winner: ${winnerName}`);
+
+    document.getElementById("rollDiceBtn").disabled = true;
+    document.getElementById("passTurnBtn").disabled = true;
+    document.getElementById("giveUpBtn").disabled = true;
+    document.querySelectorAll(".cell").forEach((c) => {
+      c.style.pointerEvents = "none";
+      c.style.opacity = "0.6";
+    });
+
+    saveScore(winnerName, "Vitória");
+    return true;
+  }
+  return false;
+}
 
 
 ================================================================================

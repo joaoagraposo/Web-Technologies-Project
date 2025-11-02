@@ -78,22 +78,41 @@ function onCellClick(e) {
   if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
 
-function isForwardRow(row) {
-  return row === 3 || row === 1;
+/* 
+   Movement Logic 
+   Blue and Red now move in mirrored directions (vertically and horizontally).
+*/
+
+function isForwardRow(row, color) {
+  // For blue: rows 3 & 1 move left→right.
+  // For red:  rows 0 & 2 move right→left (mirror).
+  if (color === 'blue') return row === 3 || row === 1;
+  return row === 0 || row === 2;
 }
 
-function evenMove(row, col, size) {
-  if (col + 1 < size) {
-    return { row, col: col + 1 };
-  }
-  return { row: row - 1, col };
-}
+function moveStep(row, col, size, color) {
+  const forward = isForwardRow(row, color);
+  const dir = color === 'red' ? -1 : 1;
 
-function oddMove(row, col, size) {
-  if (col - 1 >= 0) {
-    return { row, col: col - 1 };
+  if (forward) {
+    // "Forward" rows move horizontally
+    const nextCol = col + dir;
+    const atEdge = dir === 1 ? nextCol >= size : nextCol < 0;
+    if (!atEdge) return { row, col: nextCol };
+
+    // reached end of row → go vertically
+    const nextRow = color === 'blue' ? row - 1 : row + 1;
+    return { row: nextRow, col };
+  } else {
+    // "Backward" rows move the opposite way
+    const nextCol = col - dir;
+    const atEdge = dir === 1 ? nextCol < 0 : nextCol >= size;
+    if (!atEdge) return { row, col: nextCol };
+
+    // reached end of row → go vertically
+    const nextRow = color === 'blue' ? row - 1 : row + 1;
+    return { row: nextRow, col };
   }
-  return { row: row - 1, col };
 }
 
 function highlightMove(fromRow, fromCol, toRow, toCol) {
@@ -128,11 +147,7 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
   let steps = dice;
 
   while (steps > 0) {
-    if (isForwardRow(curRow)) {
-      ({ row: curRow, col: curCol } = evenMove(curRow, curCol, size));
-    } else {
-      ({ row: curRow, col: curCol } = oddMove(curRow, curCol, size));
-    }
+    ({ row: curRow, col: curCol } = moveStep(curRow, curCol, size, color));
     steps--;
   }
 
@@ -165,7 +180,7 @@ function applyMove(move) {
     return;
   }
 
-  //atualizar board e map
+  // Update board and map
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
@@ -180,12 +195,11 @@ function applyMove(move) {
   }
 
   piece.hasMoved = true;
-
   gameState.movePreview = null;
 
   renderPieces(gameState.board);
 
-  // limpa highlights
+  // Clear highlights
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
@@ -193,16 +207,26 @@ function applyMove(move) {
   if (checkWin()) return;
 
   if (gameState.extramove) {
-    gameState.extramove = false;
-    showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`)
-    gameState.diceValue = null;
-    document.getElementById('diceResult').innerText = '';
-    return;
+    if (gameState.currentPlayer === "ai") {
+      // Consume the extra-move flag and immediately start another AI turn
+      gameState.extramove = false;
+      showMessage(`IA ganhou jogada extra!`);
+      gameState.diceValue = null;
+      document.getElementById('diceResult').innerText = '';
+      console.log("AI earned an extra move → starting next AI roll...");
+      return setTimeout(() => aiMove(), 800);
+    } else {
+      // Human keeps their turn normally
+      gameState.extramove = false;
+      showMessage(`Saiu: ${gameState.diceValue}, tens direito a mais uma jogada`);
+      gameState.diceValue = null;
+      document.getElementById('diceResult').innerText = '';
+      return;
+    }
   }
-
+  
   nextTurn();
 }
-
 
 function canAnyMove(color) {
   const dice = gameState.diceValue;
@@ -216,7 +240,7 @@ function canAnyMove(color) {
 
     const target = gameState.board[dest.row][dest.col];
     if (!target || target.color !== color) {
-      return true; 
+      return true;
     }
   }
 
@@ -234,5 +258,3 @@ function passTurn() {
   showMessage("Vez passada.");
   nextTurn();
 }
-
-
