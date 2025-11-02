@@ -25,6 +25,16 @@ function showMessage(msg) {
 }
 
 function passTurn() {
+  if (gameState.currentPlayer !== 'human') return;
+
+  if (canAnyBlueMove()) {
+    showMessage("Ainda tens uma jogada válida, não podes passar.");
+    return;
+  }
+
+  gameState.diceValue = null;
+  document.getElementById('diceResult').innerText = '';
+  
   showMessage("Vez passada.");
   nextTurn();
 }
@@ -49,4 +59,5 @@ function giveUp() {
   });
 
   saveScore("Humano", "Desistiu");
+
 }

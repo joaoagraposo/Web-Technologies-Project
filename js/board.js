@@ -90,23 +90,24 @@ function isForwardRow(row) {
   return row === 3 || row === 1;
 }
 
-function computeDestination(row, col, dice, piece, size) {
+function computeDestination(row, col, dice, piece, size, silent = false) {
+  
   if (!piece.hasMoved && dice !== 1) {
-    showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
-    return;
+    if (!silent) showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
+    return null;
   }
 
-  if (row === 0 && anyBlueInStartRow()) {
-    showMessage(
-      'Tens peças na linha inicial (row 3), não podes avançar com as que estão no topo.'
-    );
-    return;
+  
+  if (piece.color === 'blue' && row === 0 && anyBlueInStartRow()) {
+    if (!silent) {
+      showMessage('Tens peças na linha inicial (row 3), não podes avançar com as que estão no topo.');
+    }
+    return null;
   }
 
   let curRow = row;
   let curCol = col;
   let steps = dice;
-
 
   while (steps > 0) {
     if (isForwardRow(curRow)) {
@@ -117,14 +118,8 @@ function computeDestination(row, col, dice, piece, size) {
     steps--;
   }
 
-
-  piece.destRow = curRow;
-  piece.destCol = curCol;
-  piece.hasMove = true;
-
-
-  const map =
-    piece.color === 'blue' ? gameState.bluePieces : gameState.redPieces;
+  // guardar no map
+  const map = piece.color === 'blue' ? gameState.bluePieces : gameState.redPieces;
   const meta = map.get(piece);
   if (meta) {
     meta.destRow = curRow;
@@ -132,23 +127,26 @@ function computeDestination(row, col, dice, piece, size) {
     meta.hasMove = true;
   }
 
+  if (!silent) {
+    
+    const originCell = document.querySelector(
+      `.cell[data-row="${row}"][data-col="${col}"]`
+    );
+    if (originCell) originCell.classList.add('highlight-select');
 
-  const originCell = document.querySelector(
-    `.cell[data-row="${row}"][data-col="${col}"]`
-  );
-  if (originCell) originCell.classList.add('highlight-select');
+    const destCell = document.querySelector(
+      `.cell[data-row="${curRow}"][data-col="${curCol}"]`
+    );
+    if (destCell) destCell.classList.add('highlight-move');
 
-  const destCell = document.querySelector(
-    `.cell[data-row="${curRow}"][data-col="${curCol}"]`
-  );
-  if (destCell) destCell.classList.add('highlight-move');
+    gameState.movePreview = {
+      from: { row, col },
+      to: { row: curRow, col: curCol },
+      piece,
+    };
+  }
 
-
-  gameState.movePreview = {
-    from: { row, col },
-    to: { row: curRow, col: curCol },
-    piece,
-  };
+  return { row: curRow, col: curCol };
 }
 
 
@@ -181,10 +179,19 @@ function applyMove(move) {
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
+  const map = piece.color === 'blue' ? gameState.bluePieces : gameState.redPieces;
+  const meta = map.get(piece);
+  if (meta) {
+    meta.row = to.row;
+    meta.col = to.col;
+    meta.destRow = null;
+    meta.destCol = null;
+    meta.hasMove = false;
+  }
+
   piece.hasMoved = true;
 
   gameState.movePreview = null;
-
   renderPieces(gameState.board);
 
   document.querySelectorAll('.cell').forEach(c => {

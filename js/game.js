@@ -1,4 +1,3 @@
-// game.js
 let gameState = {
   size: 7,
   currentPlayer: 'human',
@@ -31,8 +30,6 @@ function changeSize(delta) {
 }
 
 function initGame(size) {
-  showMessage("Novo Jogo Iniciado.");
-  resetGameUI();
   gameState.size = size;
   gameState.board = initPieces(size);
   gameState.currentPlayer = document.getElementById('firstPlayer').value;
@@ -42,37 +39,6 @@ function initGame(size) {
   gameState.selectedPiece = null;
   gameState.movePreview = null;
   renderPieces(gameState.board);
-  document.getElementById('diceResult').innerText = `Lance o dado, ${gameState.currentPlayer}`;
-
-}
-
-function resetGameUI() {
-  // Re-enable buttons for the next match
-  document.getElementById("rollDiceBtn").disabled = false;
-  document.getElementById("passTurnBtn").disabled = false;
-  document.getElementById("giveUpBtn").disabled = false;
-
-  // Reactivate cells
-  document.querySelectorAll(".cell").forEach(c => {
-    c.style.pointerEvents = "auto";
-    c.style.opacity = "1";
-  });
-
-  // Reset state
-  gameState = {
-    size: 7,
-    currentPlayer: 'human',
-    board: [],
-    diceValue: null,
-    move: null,
-    extramove: null,
-    selectedPiece: null,
-    redPieces: new Map(),
-    bluePieces: new Map(),
-  };
-
-  document.getElementById('messageArea').innerText = '';
-  document.getElementById('diceResult').innerText = '';
 }
 
 function initPieces(size) {
@@ -81,21 +47,26 @@ function initPieces(size) {
   gameState.redPieces = new Map();
   gameState.bluePieces = new Map();
 
+
   for (let col = 0; col < size; col++) {
     const piece = new Piece('red');
     board[0][col] = piece;
-
     gameState.redPieces.set(piece, {
+      row: 0,
+      col: col,
       hasMove: false,
       destRow: null,
       destCol: null,
     });
   }
 
+
   for (let col = 0; col < size; col++) {
     const piece = new Piece('blue');
     board[3][col] = piece;
     gameState.bluePieces.set(piece, {
+      row: 3,
+      col: col,
       hasMove: false,
       destRow: null,
       destCol: null,
@@ -116,7 +87,6 @@ function nextTurn() {
       `Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'}`
     );
     if (gameState.currentPlayer === 'ai') aiMove();
-    gameState.diceValue = null
   }
 }
 
@@ -146,7 +116,29 @@ function anyBlueInStartRow() {
 function anyRedInStartRow(){
   for (const [piece] of gameState.redPieces) {
     const pos = findPieceOnBoard(piece);
-    if (pos && pos.row === 0) return true;
+    if (pos && pos.row === 3) return true;
   }
+  return false;
+}
+
+
+function canAnyBlueMove() {
+  const dice = gameState.diceValue;
+  if (dice === null) return false;
+
+  for (const [piece, meta] of gameState.bluePieces) {
+    const { row, col } = meta;
+
+    // tenta destino em silêncio 
+    const dest = computeDestination(row, col, dice, piece, gameState.size, true);
+    if (!dest) continue;
+
+    // verificar se a casa destino não está ocupada por azul
+    const target = gameState.board[dest.row][dest.col];
+    if (!target || target.color !== 'blue') {
+      return true; 
+    }
+  }
+
   return false;
 }
