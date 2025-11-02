@@ -79,16 +79,24 @@ function initPieces(size) {
 function nextTurn() {
   if (gameState.move === 2) {
     gameState.move = null;
-    gameState.diceValue = null;
   } else {
     gameState.currentPlayer =
       gameState.currentPlayer === 'human' ? 'ai' : 'human';
     showMessage(
       `Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'}`
     );
-    if (gameState.currentPlayer === 'ai') aiMove();
+  }
+
+  gameState.diceValue = null;
+  const diceEl = document.getElementById('diceResult');
+  if (diceEl) diceEl.innerText = '';
+
+
+  if (gameState.currentPlayer === 'ai') {
+    aiMove();
   }
 }
+
 
 
 
