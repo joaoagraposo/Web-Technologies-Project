@@ -1,0 +1,1067 @@
+
+================================================================================
+Arquivo: index.html
+================================================================================
+
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Tâb</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/app.js" defer></script>
+  <script src="js/board.js" defer></script>
+  <script src="js/game.js" defer></script>
+  <script src="js/dice.js" defer></script>
+  <script src="js/ai.js" defer></script>
+  <script src="js/scoreboard.js" defer></script>
+</head>
+<body>
+  <header>
+    <img src="assets/TWLogo.png" alt="Tâb" class="logo">
+    <h1>Tâb</h1>
+  </header>
+
+  <main>
+    <section id="config">
+      <h2>Configuração</h2>
+      <label for="boardSize">Tamanho do tabuleiro:</label>
+        <button type="button" onclick="changeSize(-2)">-</button>
+        <input id="boardSize" type="number" min="7" max="15" step="2" value="7" readonly >
+        <button type="button" onclick="changeSize(2)">+</button>
+     
+      <label for="firstPlayer">Primeiro jogador:</label>
+      <select id="firstPlayer">
+        <option value="human">Humano</option>
+        <option value="ai">Computador</option>
+      </select>
+
+      <label for="humanColor">Cor do Humano:</label>
+      <select id="humanColor">
+        <option value="blue">Azul</option>
+        <option value="red">Vermelho</option>
+      </select>
+
+      <label for="aiLevel">Nível da IA:</label>
+      <select id="aiLevel">
+        <option value="easy">Fácil</option>
+        <option value="medium">Médio</option>
+      </select>
+
+      <button id="startBtn">Iniciar Jogo</button>
+    </section>
+
+    <section id="game">
+      <div id="board"></div>
+
+      <div id="controls">
+        <button id="rollDiceBtn">Lançar Dado</button>
+        <button id="passTurnBtn">Passar Vez</button>
+        <button id="giveUpBtn">Desistir</button>
+        <button id="showRulesBtn">Instruções</button>
+        <button id="showScoresBtn">Classificações</button>
+      </div>
+
+      <div id="diceResult"></div>
+      <div id="messageArea"></div>
+    </section>
+
+    <section id="panels" class="hidden">
+      <div id="rulesPanel" class="panel hidden">
+        <h2>Regras do Jogo</h2>
+        <p>// TODO: adicionar texto das regras</p>
+        <button class="closePanel">Fechar</button>
+      </div>
+
+      <div id="scoresPanel" class="panel hidden">
+        <h2>Classificações</h2>
+        <table id="scoreTable">
+          <thead>
+            <tr><th>Jogador</th><th>Resultado</th><th>Data</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button id="clearScores">Limpar</button>
+        <button class="closePanel">Fechar</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+
+
+
+================================================================================
+Arquivo: README.md
+================================================================================
+
+**Trabalho Prático**
+
+O objetivo deste trabalho é o desenvolvimento de uma aplicação web em todas as suas vertentes. O trabalho será dividido em três fases, com entregas ao longo do semestre, correspondendo à sequência de tecnologias web apresentadas nas aulas teóricas. O trabalho consiste numa versão web do jogo Tâb.
+
+---
+
+### Regras do Tâb
+
+**Descrição geral**  
+Tâb é um jogo de tabuleiro para dois jogadores.  
+O tabuleiro tem 4 linhas e um número ímpar de colunas (entre 7 e 15, geralmente 9).  
+Cada jogador tem tantas peças quanto o número de colunas, e cada um joga com peças de uma cor diferente. O tabuleiro mostrado ao jogador está ajustado à sua perspetiva (para o adversário o tabuleiro está rodado 180º).
+
+**Estado das peças**  
+Cada peça pode estar em três estados:  
+- Ainda não foi movida.  
+- Já foi movida, mas não chegou à última linha.  
+- Já esteve na última linha (4ª linha).  
+
+O estado pode ser representado visualmente, por exemplo, com diferentes níveis de transparência.
+
+---
+
+### Dado de Paus
+
+São usados 4 paus com duas faces: uma escura (arredondada) e outra clara (plana).  
+Os paus são lançados simultaneamente; o número de lados claros voltados para cima determina o valor do dado.  
+Os valores possíveis são 0, 1, 2, 3 e 4, correspondendo ao número de casas que uma peça se deve mover.
+
+**Tabela de valores e probabilidades**
+
+| Soma | Valor | Nome     | Repete | Probabilidade |
+|------|--------|----------|--------|----------------|
+| 0    | 6      | Sitteh   | Sim    | 6%             |
+| 1    | 1      | Tâb      | Sim    | 25%            |
+| 2    | 2      | Itneyn   | Não    | 38%            |
+| 3    | 3      | Teláteh  | Não    | 25%            |
+| 4    | 4      | Arba'ah  | Sim    | 6%             |
+
+---
+
+### Movimentação das Peças
+
+Antes de mover uma peça é necessário lançar o dado. A peça escolhida avança o número de casas indicado.
+
+**Início do movimento**  
+- Uma peça só pode começar a mover-se com valor 1 (Tâb).  
+- Se sair 4 ou 6, o jogador repete o lançamento.  
+- A casa de destino não pode conter peças do próprio jogador.
+
+**Progressão das peças**  
+- Peças movem-se da esquerda para a direita na 1ª e 3ª linhas.  
+- Da direita para a esquerda na 2ª e 4ª.  
+- Ao sair da 1ª linha, passam para a 2ª; da 2ª, para a 3ª; da 3ª podem ir para a 2ª ou 4ª; e da 4ª voltam à 3ª.
+
+**Restrições**  
+- Cada casa só pode conter uma peça.  
+- As peças entram apenas uma vez na 4ª linha.  
+- Uma peça nessa linha só pode mover-se se não houver peças suas na 1ª linha.  
+- Uma peça nunca regressa à linha inicial.
+
+**Passar a vez**  
+Se o valor do dado não permitir nenhuma jogada válida e não der direito a repetir o lançamento, o jogador passa a vez.
+
+**Capturar peças**  
+Se uma peça mover-se para uma casa ocupada pelo adversário, a peça inimiga é capturada e removida do tabuleiro.
+
+**Fim de jogo**  
+O jogo termina quando um jogador não tem mais peças. Ganha o jogador que ainda as tiver.
+
+---
+
+### Primeira Entrega
+
+A aplicação deve ser uma **single-page application (SPA)** em HTML, CSS e JavaScript.
+
+**Estrutura da página**  
+A página deverá ter áreas distintas, podendo algumas sobrepor-se temporariamente:
+- Logotipo  
+- Configuração  
+- Comandos  
+- Identificação  
+- Dado  
+- Tabuleiro  
+- Instruções  
+- Classificações  
+- Mensagens  
+
+---
+
+### Requisitos de Implementação
+
+**Aplicação web**  
+- Toda a aplicação deve residir numa única página HTML.  
+- O CSS e o JavaScript devem estar em ficheiros independentes.  
+- Todos os ficheiros devem ser validados.
+
+**Logotipo**  
+Deve mostrar o nome do jogo “Tâb” ou uma variação, podendo ser apenas texto destacado ou imagem.
+
+**Configuração**  
+Permitir definir:
+- Tamanho do tabuleiro.  
+- Tipo de adversário (computador ou outro jogador).  
+- Primeiro jogador.  
+- Nível da IA.
+
+Na primeira entrega: apenas jogo contra o computador.
+
+**Comandos**  
+Funções a disponibilizar:
+- Visualizar instruções.  
+- Iniciar jogo.  
+- Passar a vez (quando permitido).  
+- Desistir.  
+- Ver classificações.
+
+**Instruções**  
+Painel que apresenta regras do jogo e instruções. Pode sobrepor-se a outras áreas e deve poder ser fechado.
+
+**Identificação**  
+Permitir autenticação através de identificador e senha.  
+Na primeira entrega esta funcionalidade será apenas estrutural (sem autenticação real).
+
+**Dado de paus (interação)**  
+Área que mostra o dado e o valor sorteado.  
+O lançamento pode ser feito com um clique.  
+Após cada jogada, deve regressar ao estado inicial.
+
+**Tabuleiro**  
+Área principal da interface.  
+- Inicialmente, pode ser construído em HTML e CSS.  
+- Numa fase posterior, deve ser gerado dinamicamente via JavaScript (DOM).  
+- Deve ter estrutura de dados correspondente.
+
+**Modos do tabuleiro**  
+A ação de clicar numa casa depende do momento do jogo.  
+Deve haver controlo do modo atual através de variáveis de estado, mensagens ou cursores.
+
+**Classificações**  
+Tabela com resultados dos jogos contra a IA.  
+Em fases posteriores, os rankings serão obtidos do servidor.
+
+**Mensagens**  
+Área para mensagens de estado do jogo como:
+- “É a vez do jogador...”  
+- “Jogada inválida”  
+- “Peça capturada”  
+- “Jogo terminado”  
+- “Jogador desistiu”
+
+---
+
+### Inteligência Artificial (IA)
+
+Para a primeira entrega, os jogadores enfrentam o computador.  
+O comportamento da IA pode variar entre:  
+- Escolher jogadas válidas aleatoriamente.  
+- Dar prioridade a jogadas que permitem capturas.  
+Pode ser combinada aleatoriedade e preferência estratégica para ajustar o nível de dificuldade.
+
+---
+
+### Envio para Avaliação
+
+**Submissão**  
+- O trabalho é submetido online como um ficheiro ZIP.  
+- Apenas a última submissão conta para avaliação.  
+- O ficheiro ZIP deve conter:  
+  - `index.html`  
+  - Um ou mais ficheiros `.css`  
+  - Um ou mais ficheiros `.js`  
+- Comando sugerido:
+  ```
+  cd $PASTA_TRABALHO
+  zip trabalho.zip index.html *.{css,js}
+  ```
+
+**Autenticação e verificação**  
+- Autenticação através do LDAP do LabCC.  
+- Se o ficheiro ZIP estiver correto, o sistema mostrará “Accepted”.  
+- Em caso de erro (“Compile Time Error”), será possível ver a causa.
+
+
+================================================================================
+Arquivo: TODO.md
+================================================================================
+
+# To Do List
+- ~~When we select a piece and then another piece, the highlight does not disappear, being the two pieces highlighted.~~
+- AI model, at least a random version (URGENT)
+- ~~When starting a new game, the message that was showed last, does not disappear~~
+- ~~When starting a new game, the last dice number, does not disappear~~
+- ~~If we only can make one move, but we selected other piece that cannot move due to the fact that the possible move (which, in fact, is not possible) is to the cell where the piece we can move is at, we get stuck, unnable to move.~~
+- On the select "firstPlayer", the options should be jogador1/jogador2/ai, instead of human/ai, in order to implement, in the future, the PvP option. Didn't change this already because it is hardcoded in a lot of instances. agree vou alterar proximo commit
+- ~~Simple but working Scoreboard~~
+- Scoring function to improve scoreboard
+- CheckWin() that will call the saveScoreboard function.
+- Game buttons should only work when game has started
+
+
+================================================================================
+Arquivo: css/style.css
+================================================================================
+
+/* style.css */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fafafa;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.logo {
+  height: 50px;
+}
+
+#board {
+  display: grid;
+  gap: 5px;
+  margin-top: 20px;
+}
+
+.cell {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #444;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eee;
+  cursor: pointer;
+  position: relative;
+}
+
+
+.cell.highlight {
+  background-color: yellow !important;
+}
+.cell.highlight-select { 
+  outline: 3px solid #333; outline-offset: -2px; 
+}
+.cell.highlight-move   { 
+  outline: 3px dashed gold; outline-offset: -2px; 
+}
+
+.piece {
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25), inset 0 2px 2px rgba(255,255,255,.4);
+}
+
+.piece.red  { 
+  background: radial-gradient(circle at 35% 35%, #ff8a8a, #b30021); 
+}
+
+.piece.blue { 
+  background: radial-gradient(circle at 35% 35%, #a0c4ff, #1c4d80); 
+}
+
+.hidden {
+  display: none;
+}
+
+.panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+
+
+================================================================================
+Arquivo: js/ai.js
+================================================================================
+
+// -----------------------------------------------------------------------------
+// ai.js — versão estável com correção de direção e loop infinito
+// -----------------------------------------------------------------------------
+function aiMove() {
+  console.log("AI is playing...");
+  showMessage("IA a jogar...");
+
+  // 1️⃣  Garantir dado
+  if (gameState.diceValue === null) rollDice();
+
+  const dice = gameState.diceValue;
+  const aiColor = gameState.players.ai;
+  const path = gameState.paths?.[aiColor];
+  const dir = aiColor === "red" ? -1 : +1;
+  const map = getPiecesMapByColor(aiColor);
+  const validMoves = [];
+
+  console.log("Dice number:", dice);
+
+  // 2️⃣  Procurar jogadas válidas
+  for (const [piece, meta] of map) {
+    if (!piece.hasMoved && dice !== 1) continue;
+
+    let index = path.findIndex(p => p.row === meta.row && p.col === meta.col);
+    if (index === -1 && !piece.hasMoved && dice === 1) index = dir === 1 ? 0 : path.length - 1;
+    if (index === -1) continue;
+
+    let nextIndex = index + dir * dice;
+    nextIndex = ((nextIndex % path.length) + path.length) % path.length;
+
+    const dest = path[nextIndex];
+    const target = gameState.board[dest.row][dest.col];
+    if (target && target.color === aiColor) continue; // própria peça bloqueia
+
+    validMoves.push({
+      from: { row: meta.row, col: meta.col },
+      to: dest,
+      piece
+    });
+  }
+
+  // 3️⃣  Se não houver movimentos, passa vez
+  if (validMoves.length === 0) {
+    console.log("AI cannot move. Passing turn.");
+    showMessage(`IA passou a vez (dado ${dice}).`);
+    setTimeout(() => passTurn(), 1000);
+    return;
+  }
+
+  // 4️⃣  Preferir capturas
+  const captureMoves = validMoves.filter(m => {
+    const t = gameState.board[m.to.row][m.to.col];
+    return t && t.color !== aiColor;
+  });
+
+  const move = (captureMoves.length ? captureMoves : validMoves)
+    [Math.floor(Math.random() * (captureMoves.length ? captureMoves.length : validMoves.length))];
+
+  console.log(`AI move from [${move.from.row},${move.from.col}] → [${move.to.row},${move.to.col}]`);
+
+  // 5️⃣  Executar a jogada
+  applyMove(move);
+  showMessage(`IA (${aiColor}) jogou (dado ${dice}).`);
+
+  // 6️⃣  Tratar jogadas extra UMA VEZ
+  if ([1, 4, 6].includes(dice)) {
+    console.log(`AI ganhou lançamento extra (${dice}).`);
+    gameState.diceValue = null;
+    gameState.extramove = false;
+    setTimeout(aiMove, 1000);
+    return;
+  }
+
+  gameState.diceValue = null;
+  gameState.extramove = false;
+  setTimeout(() => nextTurn(), 1500);
+}
+
+
+================================================================================
+Arquivo: js/app.js
+================================================================================
+
+window.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.getElementById('startBtn');
+  const rollDiceBtn = document.getElementById('rollDiceBtn');
+  const passTurnBtn = document.getElementById('passTurnBtn');
+  const giveUpBtn = document.getElementById('giveUpBtn');
+
+  startBtn.addEventListener('click', startGame);
+  rollDiceBtn.addEventListener('click', rollDice);
+  passTurnBtn.addEventListener('click', passTurn);
+  giveUpBtn.addEventListener('click', giveUp);
+
+  initScoreboard();
+});
+
+function startGame() {
+  const size = parseInt(document.getElementById('boardSize').value);
+  const firstPlayer = document.getElementById('firstPlayer').value; // 'human' | 'ai'
+  const humanColor = document.getElementById('humanColor').value;   // 'blue' | 'red'
+  const aiColor = humanColor === 'blue' ? 'red' : 'blue';
+
+  createBoard(size);
+
+  initGame(size, {
+    firstPlayer,
+    humanColor,
+    aiColor,
+  });
+
+  showMessage("Jogo iniciado!");
+}
+
+function showMessage(msg) {
+  document.getElementById('messageArea').innerText = msg;
+}
+
+function passTurn() {
+  if (typeof window.passTurn === 'function') {
+    window.passTurn();
+  }
+}
+
+function giveUp() {
+  if (!confirm("Tens a certeza que queres desistir?")) return;
+
+  showMessage("Jogador desistiu. O computador venceu!");
+
+  gameState.currentPlayer = null;
+
+
+  document.getElementById("rollDiceBtn").disabled = true;
+  document.getElementById("passTurnBtn").disabled = true;
+  document.getElementById("giveUpBtn").disabled = true;
+
+  // Optional: gray out the board
+  document.querySelectorAll(".cell").forEach(c => {
+    c.style.pointerEvents = "none";
+    c.style.opacity = "0.6";
+  });
+
+  saveScore("Humano", "Desistiu");
+}
+
+
+
+================================================================================
+Arquivo: js/board.js
+================================================================================
+
+// -----------------------------------------------------------------------------
+// Board creation & rendering
+// -----------------------------------------------------------------------------
+function createBoard(size) {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  board.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+      cell.addEventListener("click", onCellClick);
+      board.appendChild(cell);
+    }
+  }
+}
+
+function renderPieces(boardState) {
+  const cells = document.querySelectorAll(".cell");
+  cells.forEach((cell) => {
+    const r = Number(cell.dataset.row);
+    const c = Number(cell.dataset.col);
+    cell.innerHTML = "";
+    cell.classList.remove("highlight-select", "highlight-move");
+
+    const occupant = boardState[r][c];
+    if (!occupant) return;
+
+    const color = occupant.color;
+    const token = document.createElement("div");
+    token.className = `piece ${color}`;
+    token.setAttribute("aria-label", `${color} piece`);
+    cell.appendChild(token);
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Path generation - dynamic circuit based on size
+// -----------------------------------------------------------------------------
+function buildCircularPaths(size) {
+  const pathRed = [];
+  for (let r = 0; r < 4; r++) {
+    const cols =
+      r % 2 === 0
+        ? [...Array(size).keys()] // left → right
+        : [...Array(size).keys()].reverse(); // right → left
+    cols.forEach((c) => pathRed.push({ row: r, col: c }));
+  }
+
+  // pathBlue is the reversed circular counterpart of pathRed
+  const pathBlue = [...pathRed].slice().reverse();
+
+  gameState.paths = {
+    red: pathRed,
+    blue: pathBlue,
+  };
+
+  console.log("Paths generated:", { pathRed, pathBlue });
+}
+
+// -----------------------------------------------------------------------------
+// Cell interactions
+// -----------------------------------------------------------------------------
+function onCellClick(e) {
+  document.querySelectorAll(".cell").forEach((c) =>
+    c.classList.remove("highlight-select", "highlight-move")
+  );
+
+  const row = Number(e.currentTarget.dataset.row);
+  const col = Number(e.currentTarget.dataset.col);
+  const dice = gameState.diceValue;
+  const piece = gameState.board[row][col];
+
+  if (dice === null) return showMessage("Ainda não lançaste o dado.");
+  if (gameState.currentPlayer !== "human")
+    return showMessage("Não é a tua vez.");
+
+  const humanColor = gameState.players.human;
+
+  if (gameState.movePreview) {
+    const { to } = gameState.movePreview;
+    if (to.row === row && to.col === col) {
+      return applyMove(gameState.movePreview);
+    }
+    gameState.movePreview = null;
+  }
+
+  if (piece && piece.color === humanColor) {
+    computeDestination(row, col, dice, piece, false);
+    return;
+  }
+
+  if (!piece) return showMessage("Casa vazia.");
+  if (piece.color !== humanColor)
+    return showMessage("Só podes mover as tuas peças.");
+}
+
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+function highlightMove(fromRow, fromCol, toRow, toCol) {
+  const originCell = document.querySelector(
+    `.cell[data-row="${fromRow}"][data-col="${fromCol}"]`
+  );
+  if (originCell) originCell.classList.add("highlight-select");
+
+  const destCell = document.querySelector(
+    `.cell[data-row="${toRow}"][data-col="${toCol}"]`
+  );
+  if (destCell) destCell.classList.add("highlight-move");
+}
+
+// -----------------------------------------------------------------------------
+// Compute movement using the circular indexed path
+// -----------------------------------------------------------------------------
+function computeDestination(row, col, dice, piece, silent = false) {
+  const color = piece.color;
+  const path = gameState.paths?.[color];
+  if (!path) {
+    console.warn("No path for color", color);
+    return null;
+  }
+
+  // Jogada inicial requer 1
+  if (!piece.hasMoved && dice !== 1) {
+    if (!silent)
+      showMessage("Esta peça ainda não se mexeu, precisa de 1 no dado.");
+    return null;
+  }
+
+  // Encontrar índice atual
+  let index = path.findIndex((p) => p.row === row && p.col === col);
+  if (index === -1 && !piece.hasMoved && dice === 1) index = 0;
+
+  // Calcular destino circular
+  let nextIndex = (index + dice) % path.length;
+  if (nextIndex < 0) nextIndex += path.length;
+
+  const dest = path[nextIndex];
+  const target = gameState.board[dest.row][dest.col];
+
+  if (target && target.color === color) {
+    if (!silent) showMessage("Casa ocupada pela tua peça.");
+    return null;
+  }
+
+  if (!silent) {
+    highlightMove(row, col, dest.row, dest.col);
+    gameState.movePreview = {
+      from: { row, col },
+      to: dest,
+      piece,
+    };
+  }
+
+  return dest;
+}
+
+// -----------------------------------------------------------------------------
+// Apply move & update state
+// -----------------------------------------------------------------------------
+function applyMove(move) {
+  const { from, to, piece } = move;
+  const target = gameState.board[to.row][to.col];
+
+  if (target && target.color !== piece.color) {
+    // captura
+    gameState.board[to.row][to.col] = null;
+  } else if (target && target.color === piece.color) {
+    showMessage("Casa ocupada pela tua peça.");
+    return;
+  }
+
+  gameState.board[from.row][from.col] = null;
+  gameState.board[to.row][to.col] = piece;
+
+  const map = getPiecesMapByColor(piece.color);
+  const meta = map.get(piece);
+  if (meta) {
+    meta.row = to.row;
+    meta.col = to.col;
+  }
+
+  piece.hasMoved = true;
+  gameState.movePreview = null;
+
+  renderPieces(gameState.board);
+  document.querySelectorAll(".cell").forEach((c) =>
+    c.classList.remove("highlight-select", "highlight-move")
+  );
+
+  if (checkWin()) return;
+
+  // Jogadas extra (1, 4, 6)
+  if ([1, 4, 6].includes(gameState.diceValue)) {
+    showMessage(`Saiu ${gameState.diceValue}! Jogas de novo.`);
+    gameState.diceValue = null;
+    document.getElementById("diceResult").innerText = "";
+    return;
+  }
+
+  nextTurn();
+}
+
+// -----------------------------------------------------------------------------
+// Check win
+// -----------------------------------------------------------------------------
+function checkWin() {
+  let hasBlue = false;
+  let hasRed = false;
+
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < gameState.size; c++) {
+      const p = gameState.board[r][c];
+      if (!p) continue;
+      if (p.color === "blue") hasBlue = true;
+      if (p.color === "red") hasRed = true;
+    }
+  }
+
+  if (!hasBlue || !hasRed) {
+    const winnerColor = hasBlue ? "blue" : "red";
+    const winnerName =
+      winnerColor === gameState.players.human ? "Humano" : "Computador";
+
+    showMessage(`Jogo terminado! ${winnerName} venceu!`);
+    console.log(`Winner: ${winnerName}`);
+
+    document.getElementById("rollDiceBtn").disabled = true;
+    document.getElementById("passTurnBtn").disabled = true;
+    document.getElementById("giveUpBtn").disabled = true;
+    document.querySelectorAll(".cell").forEach((c) => {
+      c.style.pointerEvents = "none";
+      c.style.opacity = "0.6";
+    });
+
+    saveScore(winnerName, "Vitória");
+    return true;
+  }
+  return false;
+}
+
+// -----------------------------------------------------------------------------
+// Pass turn if no valid move
+// -----------------------------------------------------------------------------
+function canAnyMove(color) {
+  const dice = gameState.diceValue;
+  if (dice === null) return false;
+
+  const map = getPiecesMapByColor(color);
+  for (const [piece, meta] of map) {
+    const dest = computeDestination(
+      meta.row,
+      meta.col,
+      dice,
+      piece,
+      true
+    );
+    if (!dest) continue;
+    const target = gameState.board?.[dest.row]?.[dest.col];
+    if (!target || target.color !== color) return true;
+  }
+  return false;
+}
+
+function passTurn() {
+  const color = gameState.currentColor;
+  if (canAnyMove(color)) {
+    showMessage("Ainda tens uma jogada válida, não podes passar.");
+    return;
+  }
+  showMessage("Vez passada.");
+  nextTurn();
+}
+
+window.passTurn = passTurn;
+
+
+================================================================================
+Arquivo: js/dice.js
+================================================================================
+
+// dice.js
+function rollDice() {
+  if(gameState.diceValue===null){
+  const sticks = Array.from({ length: 4 }, () => Math.random() < 0.5 ? 0 : 1);
+  const sum = sticks.reduce((a, b) => a + b, 0);
+  const value = (sum === 0) ? 6 : sum;
+  const extradice = [6, 1, 4].includes(value);
+  gameState.extramove = extradice;
+  gameState.diceValue = value;
+  document.getElementById('diceResult').innerText = `Dado: ${value}`;
+  
+  }
+  else {
+    showMessage(`Dado deste turno: ${gameState.diceValue}`);
+  }
+}
+ 
+
+
+================================================================================
+Arquivo: js/game.js
+================================================================================
+
+class Piece {
+  constructor(color) {
+    this.color = color;
+    this.hasMoved = false; 
+  }
+}
+
+let gameState = {
+  size: 7,
+  board: [],
+  diceValue: null,
+  move: null,
+  extramove: null,
+  selectedPiece: null,
+  currentPlayer: 'human',
+  currentColor: 'blue',
+  players: {
+    human: 'blue',
+    ai: 'red',
+  },
+
+  redPieces: new Map(),
+  bluePieces: new Map(),
+};
+
+function changeSize(delta) {
+  const input = document.getElementById('boardSize');
+  const min = parseInt(input.min);
+  const max = parseInt(input.max);
+  let value = parseInt(input.value);
+  value = Math.min(max, Math.max(min, value + delta));
+  input.value = value;
+}
+
+function resetGameUI() {
+  document.getElementById("rollDiceBtn").disabled = false;
+  document.getElementById("passTurnBtn").disabled = false;
+  document.getElementById("giveUpBtn").disabled = false;
+
+  document.querySelectorAll(".cell").forEach(c => {
+    c.style.pointerEvents = "auto";
+    c.style.opacity = "1";
+  });
+
+  document.getElementById('messageArea').innerText = '';
+  document.getElementById('diceResult').innerText = '';
+}
+
+function initGame(size, config) {
+  showMessage("Novo Jogo Iniciado.");
+  resetGameUI();
+
+  gameState.size = size;
+  gameState.board = initPieces(size);
+
+  // gerar circuitos dinâmicos
+  buildCircularPaths(size);
+
+  // quem começa
+  gameState.currentPlayer = config.firstPlayer;
+  gameState.players = {
+    human: config.humanColor,
+    ai: config.aiColor,
+  };
+  gameState.currentColor = gameState.players[gameState.currentPlayer];
+
+  gameState.diceValue = null;
+  gameState.move = null;
+  gameState.extramove = null;
+  gameState.selectedPiece = null;
+  gameState.movePreview = null;
+
+  renderPieces(gameState.board);
+
+  document.getElementById('diceResult').innerText =
+    `Lance o dado, ${gameState.currentPlayer}`;
+}
+
+
+function initPieces(size) {
+  const board = Array.from({ length: 4 }, () => Array(size).fill(null));
+
+  gameState.redPieces = new Map();
+  gameState.bluePieces = new Map();
+
+  for (let col = 0; col < size; col++) {
+    const piece = new Piece('red');
+    board[0][col] = piece;
+    gameState.redPieces.set(piece, {
+      row: 0,
+      col: col,
+      hasMove: false,
+      destRow: null,
+      destCol: null,
+    });
+  }
+
+  for (let col = 0; col < size; col++) {
+    const piece = new Piece('blue');
+    board[3][col] = piece;
+    gameState.bluePieces.set(piece, {
+      row: 3,
+      col: col,
+      hasMove: false,
+      destRow: null,
+      destCol: null,
+    });
+  }
+
+  return board;
+}
+
+
+function getPiecesMapByColor(color) {
+  return color === 'blue' ? gameState.bluePieces : gameState.redPieces;
+}
+
+function getStartRowByColor(color) {
+  return color === 'blue' ? 3 : 0;
+}
+ 
+
+function anyInStartRow(color) {
+  const map = getPiecesMapByColor(color);
+  const startRow = getStartRowByColor(color);
+  for (const [, meta] of map) {
+    if (meta.row === startRow) return true;
+  }
+  return false;
+}
+
+
+function nextTurn() {
+  gameState.currentPlayer =
+    gameState.currentPlayer === 'human' ? 'ai' : 'human';
+
+
+  gameState.currentColor = gameState.players[gameState.currentPlayer];
+
+  gameState.diceValue = null;
+  const diceEl = document.getElementById('diceResult');
+  if (diceEl) diceEl.innerText = '';
+
+  showMessage(
+    `Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'} (${gameState.currentColor})`
+  );
+
+  if (gameState.currentPlayer === 'ai') {
+    aiMove();
+  }
+}
+
+
+
+
+================================================================================
+Arquivo: js/scoreboard.js
+================================================================================
+
+// scoreboard.js
+// Handles game score persistence and UI updates
+
+function saveScore(player, result) {
+  const date = new Date().toLocaleString('pt-PT');
+  const tbody = document.querySelector("#scoreTable tbody");
+
+  // Create new row entry
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${player}</td>
+    <td>${result}</td>
+    <td>${date}</td>
+  `;
+  tbody.appendChild(row);
+
+  // Save to localStorage
+  const newEntry = { player, result, date };
+  const savedScores = JSON.parse(localStorage.getItem("tabScores") || "[]");
+  savedScores.push(newEntry);
+  localStorage.setItem("tabScores", JSON.stringify(savedScores));
+}
+
+function loadScores() {
+  const tbody = document.querySelector("#scoreTable tbody");
+  tbody.innerHTML = ""; // clear existing scores
+
+  const savedScores = JSON.parse(localStorage.getItem("tabScores") || "[]");
+  savedScores.forEach(({ player, result, date }) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${player}</td>
+      <td>${result}</td>
+      <td>${date}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function clearScores() {
+  if (confirm("Tens a certeza que queres limpar as classificações?")) {
+    localStorage.removeItem("tabScores");
+    loadScores();
+  }
+}
+
+// Called once on startup
+function initScoreboard() {
+  const clearBtn = document.getElementById("clearScores");
+  clearBtn.addEventListener("click", clearScores);
+  loadScores();
+}
+
+// Export globally (for app.js to use)
+window.saveScore = saveScore;
+window.loadScores = loadScores;
+window.clearScores = clearScores;
+window.initScoreboard = initScoreboard;
+
