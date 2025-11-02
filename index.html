@@ -5,12 +5,12 @@
   <meta charset="UTF-8">
   <title>Tâb</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="js/app.js" defer></script>
   <script src="js/board.js" defer></script>
   <script src="js/game.js" defer></script>
   <script src="js/dice.js" defer></script>
   <script src="js/ai.js" defer></script>
   <script src="js/scoreboard.js" defer></script>
+  <script src="js/app.js" defer></script>
 </head>
 <body>
   <header>
@@ -62,10 +62,28 @@
       <div id="messageArea"></div>
     </section>
 
-    <section id="panels" class="hidden">
+    <section id="panels">
       <div id="rulesPanel" class="panel hidden">
         <h2>Regras do Jogo</h2>
-        <p>// TODO: adicionar texto das regras</p>
+        <p><strong>Descrição geral:</strong> Tâb é um jogo de tabuleiro para dois jogadores. 
+        O tabuleiro tem 4 linhas e um número ímpar de colunas (entre 7 e 15, geralmente 9). 
+        Cada jogador tem tantas peças quanto o número de colunas e joga com uma cor diferente. 
+        O tabuleiro mostrado ao jogador está ajustado à sua perspetiva.</p>
+
+        <p><strong>Dado de paus:</strong> São usados 4 paus, cada um com uma face clara e uma escura. 
+        O número de faces claras para cima determina o valor do dado (0, 1, 2, 3, ou 4), com 
+        nomes e probabilidades diferentes para cada resultado.</p>
+
+        <p><strong>Movimentação:</strong> As peças movem-se conforme o número sorteado, seguindo 
+        o percurso de linhas conforme as regras do jogo. Movimentos inválidos não são permitidos 
+        e uma casa só pode ter uma peça.</p>
+
+        <p><strong>Capturas:</strong> Se uma peça se move para uma casa ocupada pelo adversário, 
+        a peça inimiga é capturada e removida.</p>
+
+        <p><strong>Fim de jogo:</strong> O jogo termina quando um jogador perde todas as peças; 
+        o outro é declarado vencedor.</p>
+
         <button class="closePanel">Fechar</button>
       </div>
 
@@ -73,12 +91,19 @@
         <h2>Classificações</h2>
         <table id="scoreTable">
           <thead>
-            <tr><th>Jogador</th><th>Resultado</th><th>Data</th></tr>
+            <tr>
+              <th>Jogador</th>
+              <th>Resultado</th>
+              <th>Data</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
-        <button id="clearScores">Limpar</button>
-        <button class="closePanel">Fechar</button>
+
+        <div style="margin-top: 10px;">
+          <button id="clearScores">Limpar Classificações</button>
+          <button class="closePanel">Fechar</button>
+        </div>
       </div>
     </section>
   </main>

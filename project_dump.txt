@@ -70,7 +70,25 @@ Arquivo: index.html
     <section id="panels" class="hidden">
       <div id="rulesPanel" class="panel hidden">
         <h2>Regras do Jogo</h2>
-        <p>// TODO: adicionar texto das regras</p>
+        <p><strong>Descrição geral:</strong> Tâb é um jogo de tabuleiro para dois jogadores. 
+        O tabuleiro tem 4 linhas e um número ímpar de colunas (entre 7 e 15, geralmente 9). 
+        Cada jogador tem tantas peças quanto o número de colunas e joga com uma cor diferente. 
+        O tabuleiro mostrado ao jogador está ajustado à sua perspetiva.</p>
+
+        <p><strong>Dado de paus:</strong> São usados 4 paus, cada um com uma face clara e uma escura. 
+        O número de faces claras para cima determina o valor do dado (0, 1, 2, 3, ou 4), com 
+        nomes e probabilidades diferentes para cada resultado.</p>
+
+        <p><strong>Movimentação:</strong> As peças movem-se conforme o número sorteado, seguindo 
+        o percurso de linhas conforme as regras do jogo. Movimentos inválidos não são permitidos 
+        e uma casa só pode ter uma peça.</p>
+
+        <p><strong>Capturas:</strong> Se uma peça se move para uma casa ocupada pelo adversário, 
+        a peça inimiga é capturada e removida.</p>
+
+        <p><strong>Fim de jogo:</strong> O jogo termina quando um jogador perde todas as peças; 
+        o outro é declarado vencedor.</p>
+
         <button class="closePanel">Fechar</button>
       </div>
 
@@ -78,12 +96,19 @@ Arquivo: index.html
         <h2>Classificações</h2>
         <table id="scoreTable">
           <thead>
-            <tr><th>Jogador</th><th>Resultado</th><th>Data</th></tr>
+            <tr>
+              <th>Jogador</th>
+              <th>Resultado</th>
+              <th>Data</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
-        <button id="clearScores">Limpar</button>
-        <button class="closePanel">Fechar</button>
+
+        <div style="margin-top: 10px;">
+          <button id="clearScores">Limpar Classificações</button>
+          <button class="closePanel">Fechar</button>
+        </div>
       </div>
     </section>
   </main>
@@ -286,7 +311,7 @@ Arquivo: TODO.md
 
 # To Do List
 - ~~When we select a piece and then another piece, the highlight does not disappear, being the two pieces highlighted.~~
-- ~~AI model, at least a random version (URGENT)~~~
+- ~~AI model, at least a random version (URGENT)~~
 
 AI finally works but this happened:
 ![alt text](image.png)
@@ -302,6 +327,9 @@ new issue:
 - ~~CheckWin() function~~ 
 - CheckWin calls the saveScoreboard function.
 - Game buttons should only work when game has started
+- Logic issue found, the second dice should be granted even if we cannot move. (RN if we didn't move any piece yet and we get 4/6 on the dice roll, we cannot move nor re-roll, which is not what is intended).
+
+- Refine the movement logic, as we are not following the correct behavior: ![alt text](image-2.png)
 
 
 ================================================================================
@@ -389,6 +417,20 @@ header {
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
+.panel {
+  z-index: 1000;
+}
+
+.panel::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: -1;
+}
 
 
 ================================================================================
@@ -509,11 +551,27 @@ window.addEventListener('DOMContentLoaded', () => {
   const rollDiceBtn = document.getElementById('rollDiceBtn');
   const passTurnBtn = document.getElementById('passTurnBtn');
   const giveUpBtn = document.getElementById('giveUpBtn');
+  const showRulesBtn = document.getElementById('showRulesBtn');
+  const showScoresBtn = document.getElementById('showScoresBtn');
+  const closePanelBtns = document.querySelectorAll('.closePanel');
 
   startBtn.addEventListener('click', startGame);
   rollDiceBtn.addEventListener('click', rollDice);
   passTurnBtn.addEventListener('click', passTurn);
   giveUpBtn.addEventListener('click', giveUp);
+  showRulesBtn.addEventListener('click', () => {
+    document.getElementById('rulesPanel').classList.remove('hidden');
+  });
+  showScoresBtn.addEventListener('click', () => {
+    loadScores();
+    document.getElementById('scoresPanel').classList.remove('hidden');
+  });
+
+  closePanelBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.panel').classList.add('hidden');
+    });
+  });
 
   initScoreboard();
 });
