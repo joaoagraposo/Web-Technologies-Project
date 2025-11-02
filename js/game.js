@@ -1,24 +1,27 @@
+class Piece {
+  constructor(color) {
+    this.color = color;
+    this.hasMoved = false; 
+  }
+}
+
 let gameState = {
   size: 7,
-  currentPlayer: 'human',
   board: [],
   diceValue: null,
   move: null,
   extramove: null,
   selectedPiece: null,
+  currentPlayer: 'human',
+  currentColor: 'blue',
+  players: {
+    human: 'blue',
+    ai: 'red',
+  },
+
   redPieces: new Map(),
   bluePieces: new Map(),
 };
-
-class Piece {
-  constructor(color, dest = null) {
-    this.color = color;  
-    this.dest = dest;     
-    this.hasMoved = false;  
-    this.destRow = null;    
-    this.destCol = null;
-  }
-}
 
 function changeSize(delta) {
   const input = document.getElementById('boardSize');
@@ -29,24 +32,53 @@ function changeSize(delta) {
   input.value = value;
 }
 
-function initGame(size) {
+function resetGameUI() {
+  document.getElementById("rollDiceBtn").disabled = false;
+  document.getElementById("passTurnBtn").disabled = false;
+  document.getElementById("giveUpBtn").disabled = false;
+
+  document.querySelectorAll(".cell").forEach(c => {
+    c.style.pointerEvents = "auto";
+    c.style.opacity = "1";
+  });
+
+  document.getElementById('messageArea').innerText = '';
+  document.getElementById('diceResult').innerText = '';
+}
+
+function initGame(size, config) {
+  showMessage("Novo Jogo Iniciado.");
+  resetGameUI();
+
   gameState.size = size;
   gameState.board = initPieces(size);
-  gameState.currentPlayer = document.getElementById('firstPlayer').value;
+
+  // quem começa
+  gameState.currentPlayer = config.firstPlayer;
+  gameState.players = {
+    human: config.humanColor,
+    ai: config.aiColor,
+  };
+  gameState.currentColor = gameState.players[gameState.currentPlayer];
+
   gameState.diceValue = null;
   gameState.move = null;
   gameState.extramove = null;
   gameState.selectedPiece = null;
   gameState.movePreview = null;
+
   renderPieces(gameState.board);
+
+  document.getElementById('diceResult').innerText =
+    `Lance o dado, ${gameState.currentPlayer}`;
 }
+
 
 function initPieces(size) {
   const board = Array.from({ length: 4 }, () => Array(size).fill(null));
 
   gameState.redPieces = new Map();
   gameState.bluePieces = new Map();
-
 
   for (let col = 0; col < size; col++) {
     const piece = new Piece('red');
@@ -59,7 +91,6 @@ function initPieces(size) {
       destCol: null,
     });
   }
-
 
   for (let col = 0; col < size; col++) {
     const piece = new Piece('blue');
@@ -76,77 +107,43 @@ function initPieces(size) {
   return board;
 }
 
-function nextTurn() {
-  if (gameState.move === 2) {
-    gameState.move = null;
-  } else {
-    gameState.currentPlayer =
-      gameState.currentPlayer === 'human' ? 'ai' : 'human';
-    showMessage(
-      `Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'}`
-    );
+
+function getPiecesMapByColor(color) {
+  return color === 'blue' ? gameState.bluePieces : gameState.redPieces;
+}
+
+function getStartRowByColor(color) {
+  return color === 'blue' ? 3 : 0;
+}
+
+
+function anyInStartRow(color) {
+  const map = getPiecesMapByColor(color);
+  const startRow = getStartRowByColor(color);
+  for (const [, meta] of map) {
+    if (meta.row === startRow) return true;
   }
+  return false;
+}
+
+
+function nextTurn() {
+  gameState.currentPlayer =
+    gameState.currentPlayer === 'human' ? 'ai' : 'human';
+
+
+  gameState.currentColor = gameState.players[gameState.currentPlayer];
 
   gameState.diceValue = null;
   const diceEl = document.getElementById('diceResult');
   if (diceEl) diceEl.innerText = '';
 
+  showMessage(
+    `Vez do ${gameState.currentPlayer === 'human' ? 'Jogador' : 'Computador'} (${gameState.currentColor})`
+  );
 
   if (gameState.currentPlayer === 'ai') {
     aiMove();
   }
 }
 
-
-
-
-
-function findPieceOnBoard(piece) {
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < gameState.size; c++) {
-      if (gameState.board[r][c] === piece) {
-        return { row: r, col: c };
-      }
-    }
-  }
-  return null;
-}
-
-
-function anyBlueInStartRow() {
-  for (const [piece] of gameState.bluePieces) {
-    const pos = findPieceOnBoard(piece);
-    if (pos && pos.row === 3) return true;
-  }
-  return false;
-}
-
-function anyRedInStartRow(){
-  for (const [piece] of gameState.redPieces) {
-    const pos = findPieceOnBoard(piece);
-    if (pos && pos.row === 3) return true;
-  }
-  return false;
-}
-
-
-function canAnyBlueMove() {
-  const dice = gameState.diceValue;
-  if (dice === null) return false;
-
-  for (const [piece, meta] of gameState.bluePieces) {
-    const { row, col } = meta;
-
-    // tenta destino em silêncio 
-    const dest = computeDestination(row, col, dice, piece, gameState.size, true);
-    if (!dest) continue;
-
-    // verificar se a casa destino não está ocupada por azul
-    const target = gameState.board[dest.row][dest.col];
-    if (!target || target.color !== 'blue') {
-      return true; 
-    }
-  }
-
-  return false;
-}

@@ -1,4 +1,3 @@
-// app.js
 window.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('startBtn');
   const rollDiceBtn = document.getElementById('rollDiceBtn');
@@ -15,8 +14,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function startGame() {
   const size = parseInt(document.getElementById('boardSize').value);
+  const firstPlayer = document.getElementById('firstPlayer').value; // 'human' | 'ai'
+  const humanColor = document.getElementById('humanColor').value;   // 'blue' | 'red'
+  const aiColor = humanColor === 'blue' ? 'red' : 'blue';
+
   createBoard(size);
-  initGame(size);
+
+  initGame(size, {
+    firstPlayer,
+    humanColor,
+    aiColor,
+  });
+
   showMessage("Jogo iniciado!");
 }
 
@@ -25,29 +34,19 @@ function showMessage(msg) {
 }
 
 function passTurn() {
-  if (gameState.currentPlayer !== 'human') return;
-
-  if (canAnyBlueMove()) {
-    showMessage("Ainda tens uma jogada válida, não podes passar.");
-    return;
+  if (typeof window.passTurn === 'function') {
+    window.passTurn();
   }
-
-  gameState.diceValue = null;
-  document.getElementById('diceResult').innerText = '';
-  
-  showMessage("Vez passada.");
-  nextTurn();
 }
 
 function giveUp() {
   if (!confirm("Tens a certeza que queres desistir?")) return;
 
   showMessage("Jogador desistiu. O computador venceu!");
-  
-  // Disable further interactions
+
   gameState.currentPlayer = null;
 
-  // Disable buttons
+
   document.getElementById("rollDiceBtn").disabled = true;
   document.getElementById("passTurnBtn").disabled = true;
   document.getElementById("giveUpBtn").disabled = true;
@@ -59,5 +58,4 @@ function giveUp() {
   });
 
   saveScore("Humano", "Desistiu");
-
 }

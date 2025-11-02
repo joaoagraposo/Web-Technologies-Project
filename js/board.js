@@ -22,16 +22,15 @@ function renderPieces(boardState) {
     const r = Number(cell.dataset.row);
     const c = Number(cell.dataset.col);
 
-
     cell.innerHTML = '';
     cell.classList.remove('highlight-select', 'highlight-move');
 
     const occupant = boardState[r][c];
     if (!occupant) return;
 
-    const color = typeof occupant === 'string' ? occupant : occupant.color; 
+    const color = typeof occupant === 'string' ? occupant : occupant.color;
     const token = document.createElement('div');
-    token.className = `piece ${color}`; 
+    token.className = `piece ${color}`;
     token.setAttribute('aria-label', `${color} piece`);
 
     cell.appendChild(token);
@@ -39,7 +38,6 @@ function renderPieces(boardState) {
 }
 
 function onCellClick(e) {
-  // Clear all highlights before handling new click
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
@@ -49,59 +47,79 @@ function onCellClick(e) {
   const dice = gameState.diceValue;
   const piece = gameState.board[row][col];
 
-  if (dice === null) return showMessage("Dice not used");
-  if (gameState.currentPlayer !== 'human') return showMessage("Not your turn.");
+  if (dice === null) return showMessage("Ainda não lançaste o dado.");
+  if (gameState.currentPlayer !== 'human') return showMessage("Não é a tua vez.");
 
-  // If there's an active preview...
+  const humanColor = gameState.players.human;
+
   if (gameState.movePreview) {
     const { to } = gameState.movePreview;
 
-    // If the clicked cell matches the preview destination
     if (to.row === row && to.col === col) {
       const target = gameState.board[row][col];
-
-      // If the destination has one of your own pieces, don't move — select it instead
-      if (target && target.color === 'blue') {
+      if (target && target.color === humanColor) {
         gameState.movePreview = null;
         computeDestination(row, col, dice, target, gameState.size);
         return;
       }
 
-      // Otherwise, valid move — apply it
       return applyMove(gameState.movePreview);
     }
 
-    // If you clicked any other cell, reset move preview
     gameState.movePreview = null;
   }
 
-  // If clicked a blue piece, start selection / compute possible move
-  if (piece && piece.color === 'blue') {
+  if (piece && piece.color === humanColor) {
     computeDestination(row, col, dice, piece, gameState.size);
     return;
   }
 
-  // Otherwise, invalid clicks
-  if (!piece) return showMessage("Empty cell.");
-  if (piece.color !== 'blue') return showMessage("You can only move blue pieces.");
+  if (!piece) return showMessage("Casa vazia.");
+  if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
 
 function isForwardRow(row) {
   return row === 3 || row === 1;
 }
 
+function evenMove(row, col, size) {
+  if (col + 1 < size) {
+    return { row, col: col + 1 };
+  }
+  return { row: row - 1, col };
+}
+
+function oddMove(row, col, size) {
+  if (col - 1 >= 0) {
+    return { row, col: col - 1 };
+  }
+  return { row: row - 1, col };
+}
+
+function highlightMove(fromRow, fromCol, toRow, toCol) {
+  const originCell = document.querySelector(
+    `.cell[data-row="${fromRow}"][data-col="${fromCol}"]`
+  );
+  if (originCell) originCell.classList.add('highlight-select');
+
+  const destCell = document.querySelector(
+    `.cell[data-row="${toRow}"][data-col="${toCol}"]`
+  );
+  if (destCell) destCell.classList.add('highlight-move');
+}
+
 function computeDestination(row, col, dice, piece, size, silent = false) {
-  
+  const color = piece.color;
+  const map = getPiecesMapByColor(color);
+
   if (!piece.hasMoved && dice !== 1) {
     if (!silent) showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
     return null;
   }
 
-  
-  if (piece.color === 'blue' && row === 0 && anyBlueInStartRow()) {
-    if (!silent) {
-      showMessage('Tens peças na linha inicial (row 3), não podes avançar com as que estão no topo.');
-    }
+  const isOppositeRow = (color === 'blue') ? (row === 0) : (row === 3);
+  if (isOppositeRow && anyInStartRow(color)) {
+    if (!silent) showMessage('Ainda tens peças na linha inicial, não podes avançar esta.');
     return null;
   }
 
@@ -118,8 +136,6 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
     steps--;
   }
 
-  // guardar no map
-  const map = piece.color === 'blue' ? gameState.bluePieces : gameState.redPieces;
   const meta = map.get(piece);
   if (meta) {
     meta.destRow = curRow;
@@ -128,16 +144,7 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
   }
 
   if (!silent) {
-    
-    const originCell = document.querySelector(
-      `.cell[data-row="${row}"][data-col="${col}"]`
-    );
-    if (originCell) originCell.classList.add('highlight-select');
-
-    const destCell = document.querySelector(
-      `.cell[data-row="${curRow}"][data-col="${curCol}"]`
-    );
-    if (destCell) destCell.classList.add('highlight-move');
+    highlightMove(row, col, curRow, curCol);
 
     gameState.movePreview = {
       from: { row, col },
@@ -149,24 +156,6 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
   return { row: curRow, col: curCol };
 }
 
-
-function evenMove(row, col, size) {
-  if (col + 1 < size) {
-    return { row, col: col + 1 };
-  }
-
-  return { row: row - 1, col };
-}
-
-
-function oddMove(row, col, size) {
-  if (col - 1 >= 0) {
-    return { row, col: col - 1 };
-  }
-  return { row: row - 1, col };
-}
-
-
 function applyMove(move) {
   const { from, to, piece } = move;
 
@@ -176,10 +165,11 @@ function applyMove(move) {
     return;
   }
 
+  //atualizar board e map
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
-  const map = piece.color === 'blue' ? gameState.bluePieces : gameState.redPieces;
+  const map = getPiecesMapByColor(piece.color);
   const meta = map.get(piece);
   if (meta) {
     meta.row = to.row;
@@ -192,8 +182,10 @@ function applyMove(move) {
   piece.hasMoved = true;
 
   gameState.movePreview = null;
+
   renderPieces(gameState.board);
 
+  // limpa highlights
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
@@ -201,9 +193,43 @@ function applyMove(move) {
   if (gameState.extramove) {
     gameState.extramove = false;
     gameState.diceValue = null;
+    document.getElementById('diceResult').innerText = '';
     return;
   }
 
-  gameState.diceValue = null;
   nextTurn();
 }
+
+
+function canAnyMove(color) {
+  const dice = gameState.diceValue;
+  if (dice === null) return false;
+
+  const map = getPiecesMapByColor(color);
+
+  for (const [piece, meta] of map) {
+    const dest = computeDestination(meta.row, meta.col, dice, piece, gameState.size, true);
+    if (!dest) continue;
+
+    const target = gameState.board[dest.row][dest.col];
+    if (!target || target.color !== color) {
+      return true; 
+    }
+  }
+
+  return false;
+}
+
+function passTurn() {
+  const color = gameState.currentColor;
+
+  if (canAnyMove(color)) {
+    showMessage("Ainda tens uma jogada válida, não podes passar.");
+    return;
+  }
+
+  showMessage("Vez passada.");
+  nextTurn();
+}
+
+
