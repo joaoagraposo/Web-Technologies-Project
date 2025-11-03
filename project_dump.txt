@@ -3,13 +3,13 @@
 Arquivo: index.html
 ================================================================================
 
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
   <title>Tâb</title>
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script src="js/board.js" defer></script>
   <script src="js/game.js" defer></script>
   <script src="js/dice.js" defer></script>
@@ -19,102 +19,116 @@ Arquivo: index.html
 </head>
 <body>
   <header>
-    <img src="assets/TWLogo.png" alt="Tâb" class="logo">
-    <h1>Tâb</h1>
+    <div class="left-zone">
+      <img src="assets/TWLogo.png" alt="Tâb" class="logo">
+      <h1>Tâb</h1>
+    </div>
+
+    <div id="userCorner">
+      <div id="userIcon" title="Clique para abrir menu">
+        <span class="material-symbols-outlined">account_circle</span>
+      </div>
+      <div id="userMenu" class="hidden">
+        <div id="userStatus">
+          <span id="loginText">Iniciar Sessão</span>
+          <span id="usernameDisplay" class="hidden"></span>
+        </div>
+        <div id="loginBox">
+          <input type="text" id="username" placeholder="Utilizador">
+          <input type="password" id="password" placeholder="Senha">
+          <button id="loginBtn">Entrar</button>
+        </div>
+        <button id="logoutBtn" class="hidden">Terminar Sessão</button>
+        <hr>
+        <button id="openConfig">⚙️ Configurações</button>
+        <button id="openRules">📜 Instruções</button>
+        <button id="openScores">🏆 Classificações</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <section id="config">
-      <h2>Configuração</h2>
+  <!-- POPUP CONFIGURAÇÃO -->
+  <div id="configPopup" class="panel">
+    <h2>Configuração Inicial</h2>
+
+    <div class="config-row">
       <label for="boardSize">Tamanho do tabuleiro:</label>
-        <button type="button" onclick="changeSize(-2)">-</button>
-        <input id="boardSize" type="number" min="7" max="15" step="2" value="7" readonly >
+      <div class="size-control">
+        <button type="button" onclick="changeSize(-2)">–</button>
+        <input id="boardSize" type="number" min="7" max="15" step="2" value="7" readonly>
         <button type="button" onclick="changeSize(2)">+</button>
-     
+      </div>
+    </div>
+
+    <div class="config-row">
       <label for="firstPlayer">Primeiro jogador:</label>
       <select id="firstPlayer">
         <option value="human">Humano</option>
         <option value="ai">Computador</option>
       </select>
+    </div>
 
+    <div class="config-row">
       <label for="humanColor">Cor do Humano:</label>
       <select id="humanColor">
         <option value="blue">Azul</option>
         <option value="red">Vermelho</option>
       </select>
+    </div>
 
+    <div class="config-row">
       <label for="aiLevel">Nível da IA:</label>
       <select id="aiLevel">
         <option value="easy">Fácil</option>
         <option value="medium">Médio</option>
       </select>
+    </div>
 
-      <button id="startBtn">Iniciar Jogo</button>
-    </section>
+    <div class="config-buttons">
+      <button id="confirmConfig">Confirmar</button>
+      <button id="closeConfig">Fechar</button>
+    </div>
+  </div>
 
+  <main>
     <section id="game">
       <div id="board"></div>
 
       <div id="controls">
-        <button id="rollDiceBtn">Lançar Dado</button>
-        <button id="passTurnBtn">Passar Vez</button>
-        <button id="giveUpBtn">Desistir</button>
-        <button id="showRulesBtn">Instruções</button>
-        <button id="showScoresBtn">Classificações</button>
+        <button id="rollDiceBtn">🎲 Lançar Dado</button>
+        <button id="passTurnBtn">⏭ Passar Vez</button>
+        <button id="giveUpBtn">🚫 Desistir</button>
       </div>
 
       <div id="diceResult"></div>
       <div id="messageArea"></div>
     </section>
+  </main>
 
-    <section id="panels">
-      <div id="rulesPanel" class="panel hidden">
-        <h2>Regras do Jogo</h2>
-        <p><strong>Descrição geral:</strong> Tâb é um jogo de tabuleiro para dois jogadores. 
-        O tabuleiro tem 4 linhas e um número ímpar de colunas (entre 7 e 15, geralmente 9). 
-        Cada jogador tem tantas peças quanto o número de colunas e joga com uma cor diferente. 
-        O tabuleiro mostrado ao jogador está ajustado à sua perspetiva.</p>
+  <!-- Regras / Classificações -->
+  <section id="panels">
+    <div id="rulesPanel" class="panel hidden">
+      <h2>Regras do Jogo</h2>
+      <p>(mantém as tuas regras existentes)</p>
+      <button class="closePanel">Fechar</button>
+    </div>
 
-        <p><strong>Dado de paus:</strong> São usados 4 paus, cada um com uma face clara e uma escura. 
-        O número de faces claras para cima determina o valor do dado (0, 1, 2, 3, ou 4), com 
-        nomes e probabilidades diferentes para cada resultado.</p>
-
-        <p><strong>Movimentação:</strong> As peças movem-se conforme o número sorteado, seguindo 
-        o percurso de linhas conforme as regras do jogo. Movimentos inválidos não são permitidos 
-        e uma casa só pode ter uma peça.</p>
-
-        <p><strong>Capturas:</strong> Se uma peça se move para uma casa ocupada pelo adversário, 
-        a peça inimiga é capturada e removida.</p>
-
-        <p><strong>Fim de jogo:</strong> O jogo termina quando um jogador perde todas as peças; 
-        o outro é declarado vencedor.</p>
-
+    <div id="scoresPanel" class="panel hidden">
+      <h2>Classificações</h2>
+      <table id="scoreTable">
+        <thead>
+          <tr><th>Jogador</th><th>Resultado</th><th>Data</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div style="margin-top:10px;">
+        <button id="clearScores">Limpar Classificações</button>
         <button class="closePanel">Fechar</button>
       </div>
-
-      <div id="scoresPanel" class="panel hidden">
-        <h2>Classificações</h2>
-        <table id="scoreTable">
-          <thead>
-            <tr>
-              <th>Jogador</th>
-              <th>Resultado</th>
-              <th>Data</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div style="margin-top: 10px;">
-          <button id="clearScores">Limpar Classificações</button>
-          <button class="closePanel">Fechar</button>
-        </div>
-      </div>
-    </section>
-  </main>
+    </div>
+  </section>
 </body>
 </html>
-
 
 
 ================================================================================
@@ -320,23 +334,20 @@ Arquivo: TODO.md
 - ~~CheckWin() function~~ 
 - ~~CheckWin calls the saveScoreboard function.~~
 - ~~Game buttons should only work when game has started~~
-- Logic issue found, the second dice should be granted even if we cannot move. (RN if we didn't move any piece yet and we get 4/6 on the dice roll, we cannot move nor re-roll, which is not what is intended).
+- ~~Logic issue found, the second dice should be granted even if we cannot move. (RN if we didn't move any piece yet and we get 4/6 on the dice roll, we cannot move nor re-roll, which is not what is intended).~~
 - On the select "firstPlayer", the options should be jogador1/jogador2/ai, instead of human/ai, in order to implement, in the future, the PvP option. Didn't change this already because it is hardcoded in a lot of instances.
 - Refine the movement logic, as we are not following the correct behavior. Apparently we should be able to go back.
 
 ![alt text](image-2.png)
 
-- AI finally works but this happened:
 
-![alt text](image.png),
-![alt text](image-1.png)
+
 
 
 ================================================================================
 Arquivo: css/style.css
 ================================================================================
 
-/* style.css */
 body {
   font-family: Arial, sans-serif;
   background-color: #fafafa;
@@ -346,24 +357,77 @@ body {
   align-items: center;
 }
 
-
+/* HEADER + USER MENU */
 header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 20px 0;
+  justify-content: space-between;
+  width: 90%;
+  margin: 10px auto;
 }
-
 .logo {
   height: 50px;
 }
+#userCorner { position: relative; }
+#userIcon {
+  cursor: pointer;
+  font-size: 32px;
+  color: #1c4d80;
+}
+#userMenu {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  width: 220px;
+  padding: 10px;
+  z-index: 2000;
+}
+#userMenu input {
+  width: 95%;
+  margin: 4px 0;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+}
+#userMenu button {
+  display: block;
+  width: 100%;
+  border: none;
+  background-color: #1c4d80;
+  color: white;
+  border-radius: 5px;
+  padding: 6px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+#userMenu button:hover { background-color: #2b6cb0; }
 
+button {
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, #1c4d80, #005fa3);
+  color: white;
+  font-weight: bold;
+  transition: transform 0.1s, background 0.3s;
+}
+button:hover {
+  background: linear-gradient(90deg, #007ad1, #003f76);
+  transform: scale(1.05);
+}
+
+/* GAME AREA */
 #board {
   display: grid;
   gap: 5px;
   margin-top: 20px;
 }
-
 .cell {
   width: 50px;
   height: 50px;
@@ -373,39 +437,17 @@ header {
   align-items: center;
   background-color: #eee;
   cursor: pointer;
-  position: relative;
 }
-
-
-.cell.highlight {
-  background-color: yellow !important;
-}
-.cell.highlight-select { 
-  outline: 3px solid #333; outline-offset: -2px; 
-}
-.cell.highlight-move   { 
-  outline: 3px dashed gold; outline-offset: -2px; 
-}
-
 .piece {
   width: 70%;
   height: 70%;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0,0,0,.25), inset 0 2px 2px rgba(255,255,255,.4);
 }
+.piece.red { background: radial-gradient(circle at 35% 35%, #ff8a8a, #b30021); }
+.piece.blue { background: radial-gradient(circle at 35% 35%, #a0c4ff, #1c4d80); }
 
-.piece.red  { 
-  background: radial-gradient(circle at 35% 35%, #ff8a8a, #b30021); 
-}
-
-.piece.blue { 
-  background: radial-gradient(circle at 35% 35%, #a0c4ff, #1c4d80); 
-}
-
-.hidden {
-  display: none;
-}
-
+/* PANELS */
 .panel {
   position: fixed;
   top: 50%;
@@ -415,32 +457,65 @@ header {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-.panel {
   z-index: 1000;
+  max-width: 600px;
+  overflow-y: auto;
+}
+.panel.hidden { display: none; }
+
+/* Popup Configuração */
+#configPopup {
+  text-align: center;
+  width: 280px;
 }
 
-.panel::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: -1;
+.size-control {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
 }
+
+.size-control button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 18px;
+  padding: 0;
+}
+
+#boardSize {
+  width: 60px;
+  text-align: center;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* Painel Configuração Buttons */
+.config-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.config-buttons button {
+  flex: 1;
+  padding: 8px;
+}
+
+.hidden { display: none; }
 
 
 ================================================================================
 Arquivo: js/ai.js
 ================================================================================
 
-// ai.js — with detailed console logging
-
+// ai.js
 function aiMove() {
-  // Safety: make sure it's still the AI's turn
+  // safety turn check
   if (gameState.currentPlayer !== "ai") return;
 
   // Reset any leftover flags from the previous turn
@@ -547,98 +622,79 @@ Arquivo: js/app.js
 ================================================================================
 
 window.addEventListener("DOMContentLoaded", () => {
-  // Botões
-  const startBtn = document.getElementById("startBtn");
-  const rollDiceBtn = document.getElementById("rollDiceBtn");
-  const passTurnBtn = document.getElementById("passTurnBtn");
-  const giveUpBtn = document.getElementById("giveUpBtn");
-  const showRulesBtn = document.getElementById("showRulesBtn");
-  const showScoresBtn = document.getElementById("showScoresBtn");
-  const closeButtons = document.querySelectorAll(".closePanel");
+  console.log("Aplicação inicializada");
 
-  //Bloquear botões de jogo até iniciar
-  rollDiceBtn.disabled = true;
-  passTurnBtn.disabled = true;
-  giveUpBtn.disabled = true;
-  
-  // Eventos principais
-  startBtn.addEventListener("click", startGame);
-  rollDiceBtn.addEventListener("click", rollDice);
-  passTurnBtn.addEventListener("click", passTurn);
-  giveUpBtn.addEventListener("click", giveUp);
+  // === LOGIN MENU MOCK ===
+  const userIcon = document.getElementById("userIcon");
+  const userMenu = document.getElementById("userMenu");
+  const userCorner = document.getElementById("userCorner");
 
-  // Painel de regras
-  showRulesBtn.addEventListener("click", () => {
-    const p = document.getElementById("rulesPanel");
-    if (p) p.classList.remove("hidden");
+  userIcon.addEventListener("click", () => userMenu.classList.toggle("hidden"));
+  document.addEventListener("click", (e) => {
+    if (!userCorner.contains(e.target)) userMenu.classList.add("hidden");
   });
 
-  // Painel de classificações
-  showScoresBtn.addEventListener("click", () => {
-    const p = document.getElementById("scoresPanel");
-    if (p) {
-      if (typeof loadScores === "function") loadScores();
-      p.classList.remove("hidden");
-    }
+  // === CONFIG POPUP ===
+  const configPopup = document.getElementById("configPopup");
+  const confirmConfigBtn = document.getElementById("confirmConfig");
+  const closeConfigBtn = document.getElementById("closeConfig");
+
+  // Mostrar automáticamente
+  configPopup.classList.remove("hidden");
+
+  confirmConfigBtn.addEventListener("click", () => {
+    // recolher opções
+    const size = parseInt(document.getElementById("boardSize").value);
+    const firstPlayer = document.getElementById("firstPlayer").value;
+    const humanColor = document.getElementById("humanColor").value;
+    const aiColor = humanColor === "blue" ? "red" : "blue";
+
+    configPopup.classList.add("hidden");
+    userMenu.classList.add("hidden");
+
+    // cria tabuleiro e inicializa jogo
+    createBoard(size);
+    initGame(size, { firstPlayer, humanColor, aiColor });
+    showMessage("Jogo iniciado!");
+
+    // desbloqueia botões do jogo
+    document.getElementById("rollDiceBtn").disabled = false;
+    document.getElementById("passTurnBtn").disabled = false;
+    document.getElementById("giveUpBtn").disabled = false;
+  });
+
+  closeConfigBtn.addEventListener("click", () => configPopup.classList.add("hidden"));
+
+  // Menu do user (abrir Config, Regras, Classificações)
+  document.getElementById("openConfig").addEventListener("click", () => {
+    configPopup.classList.remove("hidden");
+    userMenu.classList.add("hidden");
+  });
+
+  document.getElementById("openRules").addEventListener("click", () => {
+    document.getElementById("rulesPanel").classList.remove("hidden");
+  });
+
+  document.getElementById("openScores").addEventListener("click", () => {
+    if (typeof loadScores === "function") loadScores();
+    document.getElementById("scoresPanel").classList.remove("hidden");
   });
 
   // Fechar painéis
-  closeButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const panel = btn.closest(".panel");
-      if (panel) panel.classList.add("hidden");
-    });
+  document.querySelectorAll(".closePanel").forEach((btn) => {
+    btn.addEventListener("click", () => btn.closest(".panel").classList.add("hidden"));
   });
 
-  // Inicializar tabela de pontuações
   if (typeof initScoreboard === "function") initScoreboard();
 
-  console.log("App initialized");
-});
-
-
-// Funções do jogo
-function startGame() {
-  const size = parseInt(document.getElementById("boardSize").value);
-  const firstPlayer = document.getElementById("firstPlayer").value;
-  const humanColor = document.getElementById("humanColor").value;
-  const aiColor = humanColor === "blue" ? "red" : "blue";
-
-  createBoard(size);
-
-  initGame(size, {
-    firstPlayer,
-    humanColor,
-    aiColor,
-  });
-
-  showMessage("Jogo iniciado!");
-}
-
-function showMessage(msg) {
-  document.getElementById("messageArea").innerText = msg;
-}
-
-function passTurn() {
-  if (typeof window.passTurn === "function") window.passTurn();
-}
-
-function giveUp() {
-  if (!confirm("Tens a certeza que queres desistir?")) return;
-
-  showMessage("Jogador desistiu. O computador venceu!");
-  gameState.currentPlayer = null;
-
+  // Botões inicialmente desativados
   document.getElementById("rollDiceBtn").disabled = true;
   document.getElementById("passTurnBtn").disabled = true;
   document.getElementById("giveUpBtn").disabled = true;
+});
 
-  document.querySelectorAll(".cell").forEach(c => {
-    c.style.pointerEvents = "none";
-    c.style.opacity = "0.6";
-  });
-
-  if (typeof saveScore === "function") saveScore("Humano", "Desistiu");
+function showMessage(msg) {
+  document.getElementById("messageArea").innerText = msg;
 }
 
 
@@ -726,10 +782,7 @@ function onCellClick(e) {
   if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
 
-/* 
-   Movement Logic 
-   Blue and Red now move in mirrored directions (vertically and horizontally).
-*/
+
 
 function isForwardRow(row, color) {
   // For blue: rows 3 & 1 move left→right.
@@ -828,7 +881,10 @@ function applyMove(move) {
     return;
   }
 
-  // Update board and map
+  if(target && target.color !== piece.color){
+    const adversaryMap = getAdversaryMapColor(piece.color);
+    adversaryMap.delete(target);
+  }
   gameState.board[from.row][from.col] = null;
   gameState.board[to.row][to.col] = piece;
 
@@ -895,17 +951,7 @@ function canAnyMove(color) {
   return false;
 }
 
-function passTurn() {
-  const color = gameState.currentColor;
 
-  if (canAnyMove(color)) {
-    showMessage("Ainda tens uma jogada válida, não podes passar.");
-    return;
-  }
-
-  showMessage("Vez passada.");
-  nextTurn();
-}
 
 
 ================================================================================
@@ -1044,6 +1090,9 @@ function initPieces(size) {
   return board;
 }
 
+function getAdversaryMapColor(color){
+  return color === 'blue' ? gameState.redPieces : gameState.bluePieces;
+}
 
 function getPiecesMapByColor(color) {
   return color === 'blue' ? gameState.bluePieces : gameState.redPieces;
@@ -1125,13 +1174,11 @@ Arquivo: js/scoreboard.js
 ================================================================================
 
 // scoreboard.js
-// Handles game score persistence and UI updates
-
 function saveScore(player, result) {
-  const date = new Date().toLocaleString('pt-PT');
+  const date = new Date().toLocaleString("pt-PT");
   const tbody = document.querySelector("#scoreTable tbody");
 
-  // Create new row entry
+  // Create new row entry in the table
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>${player}</td>
@@ -1140,18 +1187,27 @@ function saveScore(player, result) {
   `;
   tbody.appendChild(row);
 
-  // Save to localStorage
+  // Build new score entry
   const newEntry = { player, result, date };
+
+  // Read saved scores
   const savedScores = JSON.parse(localStorage.getItem("tabScores") || "[]");
   savedScores.push(newEntry);
+
+  // Save to localStorage
   localStorage.setItem("tabScores", JSON.stringify(savedScores));
+
+  // Export JSON
+  exportScoresJSON(savedScores);
 }
 
+// Loads saved scores from localStorage and renders them into the table.
 function loadScores() {
   const tbody = document.querySelector("#scoreTable tbody");
-  tbody.innerHTML = ""; // clear existing scores
+  tbody.innerHTML = ""; // clear existing rows
 
   const savedScores = JSON.parse(localStorage.getItem("tabScores") || "[]");
+
   savedScores.forEach(({ player, result, date }) => {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -1163,6 +1219,8 @@ function loadScores() {
   });
 }
 
+// Deletes all scores (after confirmation).
+
 function clearScores() {
   if (confirm("Tens a certeza que queres limpar as classificações?")) {
     localStorage.removeItem("tabScores");
@@ -1170,14 +1228,33 @@ function clearScores() {
   }
 }
 
-// Called once on startup
+// Exports scores to a JSON file so user can save it into /scores directory.
+
+function exportScoresJSON(scoresData) {
+  try {
+    const blob = new Blob([JSON.stringify(scoresData, null, 2)], {
+      type: "application/json",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "scores.json"; // downloaded file name
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click(); // trigger download
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  } catch (err) {
+    console.error("Error exporting scores.json:", err);
+  }
+}
+
+// Called once on startup to initialize scoreboard listeners.
 function initScoreboard() {
   const clearBtn = document.getElementById("clearScores");
-  clearBtn.addEventListener("click", clearScores);
+  if (clearBtn) clearBtn.addEventListener("click", clearScores);
   loadScores();
 }
 
-// Export globally (for app.js to use)
 window.saveScore = saveScore;
 window.loadScores = loadScores;
 window.clearScores = clearScores;

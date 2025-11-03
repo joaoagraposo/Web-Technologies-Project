@@ -1,4 +1,3 @@
-/* style.css */
 body {
   font-family: Arial, sans-serif;
   background-color: #fafafa;
@@ -8,24 +7,77 @@ body {
   align-items: center;
 }
 
-
+/* HEADER + USER MENU */
 header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 20px 0;
+  justify-content: space-between;
+  width: 90%;
+  margin: 10px auto;
 }
-
 .logo {
   height: 50px;
 }
+#userCorner { position: relative; }
+#userIcon {
+  cursor: pointer;
+  font-size: 32px;
+  color: #1c4d80;
+}
+#userMenu {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  width: 220px;
+  padding: 10px;
+  z-index: 2000;
+}
+#userMenu input {
+  width: 95%;
+  margin: 4px 0;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+}
+#userMenu button {
+  display: block;
+  width: 100%;
+  border: none;
+  background-color: #1c4d80;
+  color: white;
+  border-radius: 5px;
+  padding: 6px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+#userMenu button:hover { background-color: #2b6cb0; }
 
+button {
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, #1c4d80, #005fa3);
+  color: white;
+  font-weight: bold;
+  transition: transform 0.1s, background 0.3s;
+}
+button:hover {
+  background: linear-gradient(90deg, #007ad1, #003f76);
+  transform: scale(1.05);
+}
+
+/* GAME AREA */
 #board {
   display: grid;
   gap: 5px;
   margin-top: 20px;
 }
-
 .cell {
   width: 50px;
   height: 50px;
@@ -35,39 +87,17 @@ header {
   align-items: center;
   background-color: #eee;
   cursor: pointer;
-  position: relative;
 }
-
-
-.cell.highlight {
-  background-color: yellow !important;
-}
-.cell.highlight-select { 
-  outline: 3px solid #333; outline-offset: -2px; 
-}
-.cell.highlight-move   { 
-  outline: 3px dashed gold; outline-offset: -2px; 
-}
-
 .piece {
   width: 70%;
   height: 70%;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0,0,0,.25), inset 0 2px 2px rgba(255,255,255,.4);
 }
+.piece.red { background: radial-gradient(circle at 35% 35%, #ff8a8a, #b30021); }
+.piece.blue { background: radial-gradient(circle at 35% 35%, #a0c4ff, #1c4d80); }
 
-.piece.red  { 
-  background: radial-gradient(circle at 35% 35%, #ff8a8a, #b30021); 
-}
-
-.piece.blue { 
-  background: radial-gradient(circle at 35% 35%, #a0c4ff, #1c4d80); 
-}
-
-.hidden {
-  display: none;
-}
-
+/* PANELS */
 .panel {
   position: fixed;
   top: 50%;
@@ -77,19 +107,97 @@ header {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-.panel {
   z-index: 1000;
+  max-width: 600px;
+  overflow-y: auto;
+}
+.panel.hidden { display: none; }
+
+/* Popup Configuração */
+#configPopup {
+  text-align: center;
+  width: 280px;
 }
 
-.panel::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: -1;
+.size-control {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.size-control button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 18px;
+  padding: 0;
+}
+
+#boardSize {
+  width: 60px;
+  text-align: center;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* Painel Configuração Buttons */
+.config-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.config-buttons button {
+  flex: 1;
+  padding: 8px;
+}
+
+.hidden { display: none; }
+
+.config-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.config-row label {
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.config-row select,
+.config-row input {
+  width: 80%;
+  padding: 5px;
+}
+
+/* === CONTROLOS DE JOGO === */
+#controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;   /* centra os botões horizontalmente */
+  gap: 10px;                 /* espaço entre botões */
+}
+
+#controls button {
+  min-width: 120px;
+}
+
+/* === ÁREA DE MENSAGENS === */
+#diceResult,
+#messageArea {
+  margin-top: 10px;
+  text-align: center;        /* centra o texto */
+  font-weight: bold;
+  color: #000000;
+}
+
+/* Pequeno ajuste se quiseres o texto mais separado */
+#diceResult {
+  margin-bottom: 5px;
 }
