@@ -201,3 +201,13 @@ button:hover {
 #diceResult {
   margin-bottom: 5px;
 }
+
+.highlight-select {
+  outline: 3px solid yellow;
+  background-color: #fff8a5 !important;
+}
+
+.highlight-move {
+  outline: 3px solid limegreen;
+  background-color: #caffbf !important;
+}

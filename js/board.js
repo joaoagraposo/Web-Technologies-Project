@@ -38,6 +38,7 @@ function renderPieces(boardState) {
 }
 
 function onCellClick(e) {
+  // clear previous highlights
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
@@ -52,23 +53,26 @@ function onCellClick(e) {
 
   const humanColor = gameState.players.human;
 
+  // === CASE: we had a preview (maybe with multiple options)
   if (gameState.movePreview) {
-    const { to } = gameState.movePreview;
+    const { from, options, piece: previewPiece } = gameState.movePreview;
 
-    if (to.row === row && to.col === col) {
-      const target = gameState.board[row][col];
-      if (target && target.color === humanColor) {
-        gameState.movePreview = null;
-        computeDestination(row, col, dice, target, gameState.size);
-        return;
-      }
-
-      return applyMove(gameState.movePreview);
+    // did we click one of the destinations?
+    const chosen = options.find(o => o.row === row && o.col === col);
+    if (chosen) {
+      gameState.movePreview = null;
+      return applyMove({
+        from,
+        to: chosen,
+        piece: previewPiece,
+      });
     }
 
+    // else: clicked another of my pieces → recompute for that one
     gameState.movePreview = null;
   }
 
+  // === normal selection
   if (piece && piece.color === humanColor) {
     computeDestination(row, col, dice, piece, gameState.size);
     return;
@@ -77,6 +81,7 @@ function onCellClick(e) {
   if (!piece) return showMessage("Casa vazia.");
   if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
+
 
 
 
@@ -89,28 +94,61 @@ function isForwardRow(row, color) {
 
 function moveStep(row, col, size, color) {
   const forward = isForwardRow(row, color);
-  const dir = color === 'red' ? -1 : 1;
+  const dir = (color === 'red') ? -1 : 1;
+
+  let nextCol, atEdge;
 
   if (forward) {
-    // "Forward" rows move horizontally
-    const nextCol = col + dir;
-    const atEdge = dir === 1 ? nextCol >= size : nextCol < 0;
-    if (!atEdge) return { row, col: nextCol };
-
-    // reached end of row → go vertically
-    const nextRow = color === 'blue' ? row - 1 : row + 1;
-    return { row: nextRow, col };
+    nextCol = col + dir;
+    atEdge = (dir === 1) ? (nextCol >= size) : (nextCol < 0);
   } else {
-    // "Backward" rows move the opposite way
-    const nextCol = col - dir;
-    const atEdge = dir === 1 ? nextCol < 0 : nextCol >= size;
-    if (!atEdge) return { row, col: nextCol };
+    nextCol = col - dir;
+    atEdge = (dir === 1) ? (nextCol < 0) : (nextCol >= size);
+  }
 
-    // reached end of row → go vertically
-    const nextRow = color === 'blue' ? row - 1 : row + 1;
-    return { row: nextRow, col };
+  // still inside row → just move horizontally
+  if (!atEdge) {
+    return { row, col: nextCol };
+  }
+
+  // === reached end of the lane → vertical move(s) ===
+
+  if (color === 'blue') {
+    // blue starts at 3, enemy is 0
+    if (row === 0) {
+      // wrap around enemy row → go back to 3
+      return { row: 3, col };
+    }
+    if (row === 1) {
+      // this is EXACTLY your screenshot case:
+      // blue leaving row 1 can go UP (0) or DOWN (2)
+      return [
+        { row: 0, col },
+        { row: 2, col },
+      ];
+    }
+    // normal blue (from 3 or 2): just go up
+    return { row: row - 1, col };
+  } else {
+    // RED
+    // red starts at 0, enemy is 3
+    if (row === 3) {
+      // wrap around enemy row → go back to 0
+      return { row: 0, col };
+    }
+    if (row === 2) {
+      // red leaving row 2 can go DOWN (3) or UP (1)
+      return [
+        { row: 3, col },
+        { row: 1, col },
+      ];
+    }
+    // normal red (from 0 or 1): just go down
+    return { row: row + 1, col };
   }
 }
+
+
 
 function highlightMove(fromRow, fromCol, toRow, toCol) {
   const originCell = document.querySelector(
@@ -128,45 +166,105 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
   const color = piece.color;
   const map = getPiecesMapByColor(color);
 
+  // 1st-move rule
   if (!piece.hasMoved && dice !== 1) {
     if (!silent) showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
     return null;
   }
 
+  // cannot leave opposite row if start row still has pieces
   const isOppositeRow = (color === 'blue') ? (row === 0) : (row === 3);
   if (isOppositeRow && anyInStartRow(color)) {
     if (!silent) showMessage('Ainda tens peças na linha inicial, não podes avançar esta.');
     return null;
   }
 
-  let curRow = row;
-  let curCol = col;
-  let steps = dice;
+  // we start from one position
+  let positions = [{ row, col }];
 
-  while (steps > 0) {
-    ({ row: curRow, col: curCol } = moveStep(curRow, curCol, size, color));
-    steps--;
+  // walk dice steps
+  for (let s = 0; s < dice; s++) {
+    const nextPositions = [];
+    for (const pos of positions) {
+      const step = moveStep(pos.row, pos.col, size, color);
+
+      if (Array.isArray(step)) {
+        // branch
+        step.forEach(p => nextPositions.push(p));
+      } else {
+        nextPositions.push(step);
+      }
+    }
+    positions = nextPositions;
   }
 
+  // remove cells with own piece
+  const validDests = positions.filter(p => {
+    const target = gameState.board[p.row][p.col];
+    return !target || target.color !== color;
+  });
+
+  if (validDests.length === 0) {
+    if (!silent) showMessage('Casa ocupada pela tua peça.');
+    return null;
+  }
+
+  // ------ IMPORTANT PART FOR AI ------
+  if (silent) {
+    // AI just wants ONE cell → give the first valid
+    const chosen = validDests[0];
+
+    // update meta (optional)
+    const meta = map.get(piece);
+    if (meta) {
+      meta.destRow = chosen.row;
+      meta.destCol = chosen.col;
+      meta.hasMove = true;
+    }
+
+    return chosen;   // ALWAYS an object here
+  }
+  // ------ END AI PART ------
+
+  // human → show all options
   const meta = map.get(piece);
   if (meta) {
-    meta.destRow = curRow;
-    meta.destCol = curCol;
+    if (validDests.length === 1) {
+      meta.destRow = validDests[0].row;
+      meta.destCol = validDests[0].col;
+    } else {
+      meta.destRow = null;
+      meta.destCol = null;
+    }
     meta.hasMove = true;
   }
 
-  if (!silent) {
-    highlightMove(row, col, curRow, curCol);
+  // highlight origin
+  const originCell = document.querySelector(
+    `.cell[data-row="${row}"][data-col="${col}"]`
+  );
+  if (originCell) originCell.classList.add('highlight-select');
 
-    gameState.movePreview = {
-      from: { row, col },
-      to: { row: curRow, col: curCol },
-      piece,
-    };
-  }
+  // highlight ALL destinations
+  validDests.forEach(d => {
+    const destCell = document.querySelector(
+      `.cell[data-row="${d.row}"][data-col="${d.col}"]`
+    );
+    if (destCell) destCell.classList.add('highlight-move');
+  });
 
-  return { row: curRow, col: curCol };
+  // store all options for click
+  gameState.movePreview = {
+    from: { row, col },
+    piece,
+    options: validDests,
+  };
+
+  // for human: if only one, return object; if several, return array
+  return validDests.length === 1 ? validDests[0] : validDests;
 }
+
+
 
 function applyMove(move) {
   const { from, to, piece } = move;

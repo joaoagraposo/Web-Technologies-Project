@@ -1,5 +1,67 @@
 
 ================================================================================
+Arquivo: dump_project_files.py
+================================================================================
+
+import os
+
+# Pasta base (pode ser alterada se quiseres apontar para outro diretório)
+BASE_DIR = '.'
+OUTPUT_FILE = 'project_dump.txt'
+
+
+def should_skip(filename, self_path):
+    """Define ficheiros e pastas a ignorar."""
+    skip_dirs = {'.git', '__pycache__', 'node_modules', 'venv'}
+    skip_exts = {'.pyc', '.png', '.jpg', '.jpeg', '.gif', '.exe', '.dll', '.zip'}
+
+    # Ignorar certas pastas
+    if any(part in skip_dirs for part in filename.split(os.sep)):
+        return True
+
+    # Ignorar formatos binários
+    _, ext = os.path.splitext(filename.lower())
+    if ext in skip_exts:
+        return True
+
+    # Ignorar o próprio ficheiro e o ficheiro de saída
+    if os.path.abspath(filename) in {os.path.abspath(self_path), os.path.abspath(OUTPUT_FILE)}:
+        return True
+
+    return False
+
+
+def dump_files(base_dir=BASE_DIR, output_path=OUTPUT_FILE):
+    self_path = os.path.abspath(__file__)
+
+    with open(output_path, 'w', encoding='utf-8') as out:
+        for root, _, files in os.walk(base_dir):
+            for fname in files:
+                full_path = os.path.join(root, fname)
+                if should_skip(full_path, self_path):
+                    continue
+                try:
+                    with open(full_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                except Exception as e:
+                    print(f"[Aviso] Não consegui ler {full_path}: {e}")
+                    continue
+                
+                # Escreve cabeçalho + conteúdo
+                out.write(f"\n{'='*80}\n")
+                out.write(f"Arquivo: {os.path.relpath(full_path, base_dir)}\n")
+                out.write(f"{'='*80}\n\n")
+                out.write(content)
+                out.write("\n\n")
+
+    print(f"\n✅ Conteúdo de todos os ficheiros guardado em: {os.path.abspath(output_path)}")
+
+
+if __name__ == "__main__":
+    dump_files()
+
+
+================================================================================
 Arquivo: index.html
 ================================================================================
 
@@ -107,11 +169,28 @@ Arquivo: index.html
 
   <!-- Regras / Classificações -->
   <section id="panels">
-    <div id="rulesPanel" class="panel hidden">
-      <h2>Regras do Jogo</h2>
-      <p>(mantém as tuas regras existentes)</p>
-      <button class="closePanel">Fechar</button>
-    </div>
+      <div id="rulesPanel" class="panel hidden">
+        <h2>Regras do Jogo</h2>
+          <p><strong>Descrição geral:</strong> Tâb é um jogo de tabuleiro para dois jogadores. 
+          O tabuleiro tem 4 linhas e um número ímpar de colunas (entre 7 e 15, geralmente 9). 
+          Cada jogador tem tantas peças quanto o número de colunas e joga com uma cor diferente. 
+          O tabuleiro mostrado ao jogador está ajustado à sua perspetiva.</p>
+
+          <p><strong>Dado de paus:</strong> São usados 4 paus, cada um com uma face clara e uma escura. 
+          O número de faces claras para cima determina o valor do dado (0, 1, 2, 3, ou 4), com 
+          nomes e probabilidades diferentes para cada resultado.</p>
+
+          <p><strong>Movimentação:</strong> As peças movem-se conforme o número sorteado, seguindo 
+          o percurso de linhas conforme as regras do jogo. Movimentos inválidos não são permitidos 
+          e uma casa só pode ter uma peça.</p>
+
+          <p><strong>Capturas:</strong> Se uma peça se move para uma casa ocupada pelo adversário, 
+          a peça inimiga é capturada e removida.</p>
+
+          <p><strong>Fim de jogo:</strong> O jogo termina quando um jogador perde todas as peças; 
+          o outro é declarado vencedor.</p>
+        <button class="closePanel">Fechar</button>
+      </div>
 
     <div id="scoresPanel" class="panel hidden">
       <h2>Classificações</h2>
@@ -345,7 +424,7 @@ Arquivo: TODO.md
 
 
 ================================================================================
-Arquivo: css/style.css
+Arquivo: css\style.css
 ================================================================================
 
 body {
@@ -508,9 +587,63 @@ button:hover {
 
 .hidden { display: none; }
 
+.config-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.config-row label {
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.config-row select,
+.config-row input {
+  width: 80%;
+  padding: 5px;
+}
+
+/* === CONTROLOS DE JOGO === */
+#controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;   /* centra os botões horizontalmente */
+  gap: 10px;                 /* espaço entre botões */
+}
+
+#controls button {
+  min-width: 120px;
+}
+
+/* === ÁREA DE MENSAGENS === */
+#diceResult,
+#messageArea {
+  margin-top: 10px;
+  text-align: center;        /* centra o texto */
+  font-weight: bold;
+  color: #000000;
+}
+
+/* Pequeno ajuste se quiseres o texto mais separado */
+#diceResult {
+  margin-bottom: 5px;
+}
+
+.highlight-select {
+  outline: 3px solid yellow;
+  background-color: #fff8a5 !important;
+}
+
+.highlight-move {
+  outline: 3px solid limegreen;
+  background-color: #caffbf !important;
+}
+
 
 ================================================================================
-Arquivo: js/ai.js
+Arquivo: js\ai.js
 ================================================================================
 
 // ai.js
@@ -618,88 +751,224 @@ function performAIMove(color, level) {
 
 
 ================================================================================
-Arquivo: js/app.js
+Arquivo: js\app.js
 ================================================================================
 
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("Aplicação inicializada");
+  console.log("App initialized");
 
-  // === LOGIN MENU MOCK ===
+  // === USER MENU & LOGIN MOCK ===
   const userIcon = document.getElementById("userIcon");
   const userMenu = document.getElementById("userMenu");
   const userCorner = document.getElementById("userCorner");
 
-  userIcon.addEventListener("click", () => userMenu.classList.toggle("hidden"));
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const usernameDisplay = document.getElementById("usernameDisplay");
+  const loginText = document.getElementById("loginText");
+  const loginBox = document.getElementById("loginBox");
+
+  // abrir/fechar menu
+  if (userIcon) {
+    userIcon.addEventListener("click", (e) => {
+      e.stopPropagation(); // evita fecho imediato
+      userMenu.classList.toggle("hidden");
+    });
+  }
+
   document.addEventListener("click", (e) => {
-    if (!userCorner.contains(e.target)) userMenu.classList.add("hidden");
+    if (!userCorner.contains(e.target)) {
+      userMenu.classList.add("hidden");
+    }
   });
 
-  // === CONFIG POPUP ===
+  // LOGIN MOCK
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      const user = document.getElementById("username").value.trim();
+      if (user === "") {
+        alert("Por favor, introduz um nome de utilizador.");
+        return;
+      }
+
+      // Atualiza visualmente o menu
+      loginText.classList.add("hidden");
+      usernameDisplay.classList.remove("hidden");
+      usernameDisplay.textContent = `Bem‑vindo, ${user}!`;
+
+      loginBox.classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
+
+      // Mensagem de feedback (opcional, aparece na área de mensagens do jogo)
+      showMessage(`Bem‑vindo, ${user}!`);
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      loginText.classList.remove("hidden");
+      usernameDisplay.classList.add("hidden");
+      loginBox.classList.remove("hidden");
+      logoutBtn.classList.add("hidden");
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+    });
+  }
+
+  // === ELEMENTOS PRINCIPAIS ===
+  const rollDiceBtn = document.getElementById("rollDiceBtn");
+  const passTurnBtn = document.getElementById("passTurnBtn");
+  const giveUpBtn = document.getElementById("giveUpBtn");
+  const closeButtons = document.querySelectorAll(".closePanel");
+
+  // === BLOQUEAR BOTÕES ATÉ COMEÇAR ===
+  if (rollDiceBtn) rollDiceBtn.disabled = true;
+  if (passTurnBtn) passTurnBtn.disabled = true;
+  if (giveUpBtn) giveUpBtn.disabled = true;
+
+  if (rollDiceBtn) rollDiceBtn.addEventListener("click", rollDice);
+  if (passTurnBtn) passTurnBtn.addEventListener("click", passTurn);
+  if (giveUpBtn) giveUpBtn.addEventListener("click", giveUp);
+
+  closeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const panel = btn.closest(".panel");
+      if (panel) panel.classList.add("hidden");
+    });
+  });
+
+  // === SCOREBOARD ===
+  if (typeof initScoreboard === "function") initScoreboard();
+
+  // === POPUP CONFIGURAÇÃO ===
   const configPopup = document.getElementById("configPopup");
   const confirmConfigBtn = document.getElementById("confirmConfig");
   const closeConfigBtn = document.getElementById("closeConfig");
 
-  // Mostrar automáticamente
-  configPopup.classList.remove("hidden");
+  if (configPopup) configPopup.classList.remove("hidden");
 
-  confirmConfigBtn.addEventListener("click", () => {
-    // recolher opções
-    const size = parseInt(document.getElementById("boardSize").value);
-    const firstPlayer = document.getElementById("firstPlayer").value;
-    const humanColor = document.getElementById("humanColor").value;
-    const aiColor = humanColor === "blue" ? "red" : "blue";
+  if (confirmConfigBtn) {
+    confirmConfigBtn.addEventListener("click", () => {
+      configPopup.classList.add("hidden");
+      userMenu.classList.add("hidden");
+      startGame();
+    });
+  }
 
-    configPopup.classList.add("hidden");
-    userMenu.classList.add("hidden");
+  if (closeConfigBtn) {
+    closeConfigBtn.addEventListener("click", () => {
+      configPopup.classList.add("hidden");
+    });
+  }
 
-    // cria tabuleiro e inicializa jogo
-    createBoard(size);
-    initGame(size, { firstPlayer, humanColor, aiColor });
-    showMessage("Jogo iniciado!");
+  // === BOTÕES DO MENU DE UTILIZADOR ===
+  const openConfigBtn = document.getElementById("openConfig");
+  const openRulesBtn = document.getElementById("openRules");
+  const openScoresBtn = document.getElementById("openScores");
 
-    // desbloqueia botões do jogo
-    document.getElementById("rollDiceBtn").disabled = false;
-    document.getElementById("passTurnBtn").disabled = false;
-    document.getElementById("giveUpBtn").disabled = false;
+  if (openConfigBtn) {
+    openConfigBtn.addEventListener("click", () => {
+      userMenu.classList.add("hidden");
+      configPopup.classList.remove("hidden");
+    });
+  }
+
+  if (openRulesBtn) {
+    openRulesBtn.addEventListener("click", () => {
+      userMenu.classList.add("hidden");
+      const p = document.getElementById("rulesPanel");
+      if (p) p.classList.remove("hidden");
+    });
+  }
+
+  if (openScoresBtn) {
+    openScoresBtn.addEventListener("click", () => {
+      userMenu.classList.add("hidden");
+      if (typeof loadScores === "function") loadScores();
+      const p = document.getElementById("scoresPanel");
+      if (p) p.classList.remove("hidden");
+    });
+  }
+
+  console.log("Menus e login configurados, popup ativo.");
+});
+
+// === FUNÇÕES DO JOGO ===
+
+function startGame() {
+  const size = parseInt(document.getElementById("boardSize").value);
+  const firstPlayer = document.getElementById("firstPlayer").value;
+  const humanColor = document.getElementById("humanColor").value;
+  const aiColor = humanColor === "blue" ? "red" : "blue";
+
+  createBoard(size);
+  initGame(size, {
+    firstPlayer,
+    humanColor,
+    aiColor,
   });
 
-  closeConfigBtn.addEventListener("click", () => configPopup.classList.add("hidden"));
+  document.getElementById("rollDiceBtn").disabled = false;
+  document.getElementById("passTurnBtn").disabled = false;
+  document.getElementById("giveUpBtn").disabled = false;
 
-  // Menu do user (abrir Config, Regras, Classificações)
-  document.getElementById("openConfig").addEventListener("click", () => {
-    configPopup.classList.remove("hidden");
-    userMenu.classList.add("hidden");
-  });
+  showMessage("Jogo iniciado!");
+}
 
-  document.getElementById("openRules").addEventListener("click", () => {
-    document.getElementById("rulesPanel").classList.remove("hidden");
-  });
+function showMessage(msg) {
+  const area = document.getElementById("messageArea");
+  if (area) area.innerText = msg;
+}
 
-  document.getElementById("openScores").addEventListener("click", () => {
-    if (typeof loadScores === "function") loadScores();
-    document.getElementById("scoresPanel").classList.remove("hidden");
-  });
+function passTurn() {
+  if (gameState.diceValue === null) {
+    showMessage("Tens de lançar o dado antes de passar a vez.");
+    return;
+  }
 
-  // Fechar painéis
-  document.querySelectorAll(".closePanel").forEach((btn) => {
-    btn.addEventListener("click", () => btn.closest(".panel").classList.add("hidden"));
-  });
 
-  if (typeof initScoreboard === "function") initScoreboard();
+  if (gameState.extramove === true) {
+    gameState.extramove = false;
+    gameState.diceValue = null;
+    document.getElementById('diceResult').innerText = '';
+    showMessage("Jogada extra cancelada. Continua a tua vez.");
+    return;
+  }
 
-  // Botões inicialmente desativados
+  const color = gameState.currentColor;
+
+  if (canAnyMove(color)) {
+    showMessage("Ainda tens uma jogada válida, não podes passar.");
+    return;
+  }
+
+  showMessage("Vez passada.");
+  gameState.diceValue = null;
+  document.getElementById('diceResult').innerText = '';
+  nextTurn();
+}
+
+function giveUp() {
+  if (!confirm("Tens a certeza que queres desistir?")) return;
+
+  showMessage("Jogador desistiu. O computador venceu!");
+  gameState.currentPlayer = null;
+
   document.getElementById("rollDiceBtn").disabled = true;
   document.getElementById("passTurnBtn").disabled = true;
   document.getElementById("giveUpBtn").disabled = true;
-});
 
-function showMessage(msg) {
-  document.getElementById("messageArea").innerText = msg;
+  document.querySelectorAll(".cell").forEach((c) => {
+    c.style.pointerEvents = "none";
+    c.style.opacity = "0.6";
+  });
+
+  if (typeof saveScore === "function") saveScore("Humano", "Desistiu");
 }
 
 
 ================================================================================
-Arquivo: js/board.js
+Arquivo: js\board.js
 ================================================================================
 
 // board.js
@@ -742,6 +1011,7 @@ function renderPieces(boardState) {
 }
 
 function onCellClick(e) {
+  // clear previous highlights
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
@@ -756,23 +1026,26 @@ function onCellClick(e) {
 
   const humanColor = gameState.players.human;
 
+  // === CASE: we had a preview (maybe with multiple options)
   if (gameState.movePreview) {
-    const { to } = gameState.movePreview;
+    const { from, options, piece: previewPiece } = gameState.movePreview;
 
-    if (to.row === row && to.col === col) {
-      const target = gameState.board[row][col];
-      if (target && target.color === humanColor) {
-        gameState.movePreview = null;
-        computeDestination(row, col, dice, target, gameState.size);
-        return;
-      }
-
-      return applyMove(gameState.movePreview);
+    // did we click one of the destinations?
+    const chosen = options.find(o => o.row === row && o.col === col);
+    if (chosen) {
+      gameState.movePreview = null;
+      return applyMove({
+        from,
+        to: chosen,
+        piece: previewPiece,
+      });
     }
 
+    // else: clicked another of my pieces → recompute for that one
     gameState.movePreview = null;
   }
 
+  // === normal selection
   if (piece && piece.color === humanColor) {
     computeDestination(row, col, dice, piece, gameState.size);
     return;
@@ -781,6 +1054,7 @@ function onCellClick(e) {
   if (!piece) return showMessage("Casa vazia.");
   if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
+
 
 
 
@@ -793,28 +1067,61 @@ function isForwardRow(row, color) {
 
 function moveStep(row, col, size, color) {
   const forward = isForwardRow(row, color);
-  const dir = color === 'red' ? -1 : 1;
+  const dir = (color === 'red') ? -1 : 1;
+
+  let nextCol, atEdge;
 
   if (forward) {
-    // "Forward" rows move horizontally
-    const nextCol = col + dir;
-    const atEdge = dir === 1 ? nextCol >= size : nextCol < 0;
-    if (!atEdge) return { row, col: nextCol };
-
-    // reached end of row → go vertically
-    const nextRow = color === 'blue' ? row - 1 : row + 1;
-    return { row: nextRow, col };
+    nextCol = col + dir;
+    atEdge = (dir === 1) ? (nextCol >= size) : (nextCol < 0);
   } else {
-    // "Backward" rows move the opposite way
-    const nextCol = col - dir;
-    const atEdge = dir === 1 ? nextCol < 0 : nextCol >= size;
-    if (!atEdge) return { row, col: nextCol };
+    nextCol = col - dir;
+    atEdge = (dir === 1) ? (nextCol < 0) : (nextCol >= size);
+  }
 
-    // reached end of row → go vertically
-    const nextRow = color === 'blue' ? row - 1 : row + 1;
-    return { row: nextRow, col };
+  // still inside row → just move horizontally
+  if (!atEdge) {
+    return { row, col: nextCol };
+  }
+
+  // === reached end of the lane → vertical move(s) ===
+
+  if (color === 'blue') {
+    // blue starts at 3, enemy is 0
+    if (row === 0) {
+      // wrap around enemy row → go back to 3
+      return { row: 3, col };
+    }
+    if (row === 1) {
+      // this is EXACTLY your screenshot case:
+      // blue leaving row 1 can go UP (0) or DOWN (2)
+      return [
+        { row: 0, col },
+        { row: 2, col },
+      ];
+    }
+    // normal blue (from 3 or 2): just go up
+    return { row: row - 1, col };
+  } else {
+    // RED
+    // red starts at 0, enemy is 3
+    if (row === 3) {
+      // wrap around enemy row → go back to 0
+      return { row: 0, col };
+    }
+    if (row === 2) {
+      // red leaving row 2 can go DOWN (3) or UP (1)
+      return [
+        { row: 3, col },
+        { row: 1, col },
+      ];
+    }
+    // normal red (from 0 or 1): just go down
+    return { row: row + 1, col };
   }
 }
+
+
 
 function highlightMove(fromRow, fromCol, toRow, toCol) {
   const originCell = document.querySelector(
@@ -832,45 +1139,105 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
   const color = piece.color;
   const map = getPiecesMapByColor(color);
 
+  // 1st-move rule
   if (!piece.hasMoved && dice !== 1) {
     if (!silent) showMessage('Esta peça ainda não se mexeu, precisa de 1 no dado.');
     return null;
   }
 
+  // cannot leave opposite row if start row still has pieces
   const isOppositeRow = (color === 'blue') ? (row === 0) : (row === 3);
   if (isOppositeRow && anyInStartRow(color)) {
     if (!silent) showMessage('Ainda tens peças na linha inicial, não podes avançar esta.');
     return null;
   }
 
-  let curRow = row;
-  let curCol = col;
-  let steps = dice;
+  // we start from one position
+  let positions = [{ row, col }];
 
-  while (steps > 0) {
-    ({ row: curRow, col: curCol } = moveStep(curRow, curCol, size, color));
-    steps--;
+  // walk dice steps
+  for (let s = 0; s < dice; s++) {
+    const nextPositions = [];
+    for (const pos of positions) {
+      const step = moveStep(pos.row, pos.col, size, color);
+
+      if (Array.isArray(step)) {
+        // branch
+        step.forEach(p => nextPositions.push(p));
+      } else {
+        nextPositions.push(step);
+      }
+    }
+    positions = nextPositions;
   }
 
+  // remove cells with own piece
+  const validDests = positions.filter(p => {
+    const target = gameState.board[p.row][p.col];
+    return !target || target.color !== color;
+  });
+
+  if (validDests.length === 0) {
+    if (!silent) showMessage('Casa ocupada pela tua peça.');
+    return null;
+  }
+
+  // ------ IMPORTANT PART FOR AI ------
+  if (silent) {
+    // AI just wants ONE cell → give the first valid
+    const chosen = validDests[0];
+
+    // update meta (optional)
+    const meta = map.get(piece);
+    if (meta) {
+      meta.destRow = chosen.row;
+      meta.destCol = chosen.col;
+      meta.hasMove = true;
+    }
+
+    return chosen;   // ALWAYS an object here
+  }
+  // ------ END AI PART ------
+
+  // human → show all options
   const meta = map.get(piece);
   if (meta) {
-    meta.destRow = curRow;
-    meta.destCol = curCol;
+    if (validDests.length === 1) {
+      meta.destRow = validDests[0].row;
+      meta.destCol = validDests[0].col;
+    } else {
+      meta.destRow = null;
+      meta.destCol = null;
+    }
     meta.hasMove = true;
   }
 
-  if (!silent) {
-    highlightMove(row, col, curRow, curCol);
+  // highlight origin
+  const originCell = document.querySelector(
+    `.cell[data-row="${row}"][data-col="${col}"]`
+  );
+  if (originCell) originCell.classList.add('highlight-select');
 
-    gameState.movePreview = {
-      from: { row, col },
-      to: { row: curRow, col: curCol },
-      piece,
-    };
-  }
+  // highlight ALL destinations
+  validDests.forEach(d => {
+    const destCell = document.querySelector(
+      `.cell[data-row="${d.row}"][data-col="${d.col}"]`
+    );
+    if (destCell) destCell.classList.add('highlight-move');
+  });
 
-  return { row: curRow, col: curCol };
+  // store all options for click
+  gameState.movePreview = {
+    from: { row, col },
+    piece,
+    options: validDests,
+  };
+
+  // for human: if only one, return object; if several, return array
+  return validDests.length === 1 ? validDests[0] : validDests;
 }
+
+
 
 function applyMove(move) {
   const { from, to, piece } = move;
@@ -955,7 +1322,7 @@ function canAnyMove(color) {
 
 
 ================================================================================
-Arquivo: js/dice.js
+Arquivo: js\dice.js
 ================================================================================
 
 // dice.js
@@ -978,7 +1345,7 @@ function rollDice() {
 
 
 ================================================================================
-Arquivo: js/game.js
+Arquivo: js\game.js
 ================================================================================
 
 class Piece {
@@ -1170,15 +1537,17 @@ function checkWin() {
 
 
 ================================================================================
-Arquivo: js/scoreboard.js
+Arquivo: js\scoreboard.js
 ================================================================================
 
 // scoreboard.js
+// Handles game score persistence and UI updates
+
 function saveScore(player, result) {
-  const date = new Date().toLocaleString("pt-PT");
+  const date = new Date().toLocaleString('pt-PT');
   const tbody = document.querySelector("#scoreTable tbody");
 
-  // Create new row entry in the table
+  // Create new row entry
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>${player}</td>
@@ -1187,27 +1556,18 @@ function saveScore(player, result) {
   `;
   tbody.appendChild(row);
 
-  // Build new score entry
+  // Save to localStorage
   const newEntry = { player, result, date };
-
-  // Read saved scores
   const savedScores = JSON.parse(localStorage.getItem("tabScores") || "[]");
   savedScores.push(newEntry);
-
-  // Save to localStorage
   localStorage.setItem("tabScores", JSON.stringify(savedScores));
-
-  // Export JSON
-  exportScoresJSON(savedScores);
 }
 
-// Loads saved scores from localStorage and renders them into the table.
 function loadScores() {
   const tbody = document.querySelector("#scoreTable tbody");
-  tbody.innerHTML = ""; // clear existing rows
+  tbody.innerHTML = ""; // clear existing scores
 
   const savedScores = JSON.parse(localStorage.getItem("tabScores") || "[]");
-
   savedScores.forEach(({ player, result, date }) => {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -1219,8 +1579,6 @@ function loadScores() {
   });
 }
 
-// Deletes all scores (after confirmation).
-
 function clearScores() {
   if (confirm("Tens a certeza que queres limpar as classificações?")) {
     localStorage.removeItem("tabScores");
@@ -1228,33 +1586,14 @@ function clearScores() {
   }
 }
 
-// Exports scores to a JSON file so user can save it into /scores directory.
-
-function exportScoresJSON(scoresData) {
-  try {
-    const blob = new Blob([JSON.stringify(scoresData, null, 2)], {
-      type: "application/json",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "scores.json"; // downloaded file name
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click(); // trigger download
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
-  } catch (err) {
-    console.error("Error exporting scores.json:", err);
-  }
-}
-
-// Called once on startup to initialize scoreboard listeners.
+// Called once on startup
 function initScoreboard() {
   const clearBtn = document.getElementById("clearScores");
-  if (clearBtn) clearBtn.addEventListener("click", clearScores);
+  clearBtn.addEventListener("click", clearScores);
   loadScores();
 }
 
+// Export globally (for app.js to use)
 window.saveScore = saveScore;
 window.loadScores = loadScores;
 window.clearScores = clearScores;
