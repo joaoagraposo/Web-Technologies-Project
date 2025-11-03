@@ -1,4 +1,4 @@
-// dice.js
+// lança o dado de paus e guarda o valor e a flag de jogada extra
 function rollDice() {
   if(gameState.diceValue===null){
   const sticks = Array.from({ length: 4 }, () => Math.random() < 0.5 ? 0 : 1);
@@ -14,4 +14,3 @@ function rollDice() {
     showMessage(`Dado deste turno: ${gameState.diceValue}`);
   }
 }
- 

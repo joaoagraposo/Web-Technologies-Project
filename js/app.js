@@ -1,7 +1,7 @@
+// inicializa a aplicação, menus, login e configurações do jogo
 window.addEventListener("DOMContentLoaded", () => {
   console.log("App initialized");
 
-  // === USER MENU & LOGIN MOCK ===
   const userIcon = document.getElementById("userIcon");
   const userMenu = document.getElementById("userMenu");
   const userCorner = document.getElementById("userCorner");
@@ -12,10 +12,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const loginText = document.getElementById("loginText");
   const loginBox = document.getElementById("loginBox");
 
-  // abrir/fechar menu
   if (userIcon) {
     userIcon.addEventListener("click", (e) => {
-      e.stopPropagation(); // evita fecho imediato
+      e.stopPropagation();
       userMenu.classList.toggle("hidden");
     });
   }
@@ -26,7 +25,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // LOGIN MOCK
   if (loginBtn) {
     loginBtn.addEventListener("click", () => {
       const user = document.getElementById("username").value.trim();
@@ -35,16 +33,14 @@ window.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Atualiza visualmente o menu
       loginText.classList.add("hidden");
       usernameDisplay.classList.remove("hidden");
-      usernameDisplay.textContent = `Bem‑vindo, ${user}!`;
+      usernameDisplay.textContent = `Bem-vindo, ${user}!`;
 
       loginBox.classList.add("hidden");
       logoutBtn.classList.remove("hidden");
 
-      // Mensagem de feedback (opcional, aparece na área de mensagens do jogo)
-      showMessage(`Bem‑vindo, ${user}!`);
+      showMessage(`Bem-vindo, ${user}!`);
     });
   }
 
@@ -59,13 +55,11 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // === ELEMENTOS PRINCIPAIS ===
   const rollDiceBtn = document.getElementById("rollDiceBtn");
   const passTurnBtn = document.getElementById("passTurnBtn");
   const giveUpBtn = document.getElementById("giveUpBtn");
   const closeButtons = document.querySelectorAll(".closePanel");
 
-  // === BLOQUEAR BOTÕES ATÉ COMEÇAR ===
   if (rollDiceBtn) rollDiceBtn.disabled = true;
   if (passTurnBtn) passTurnBtn.disabled = true;
   if (giveUpBtn) giveUpBtn.disabled = true;
@@ -81,10 +75,8 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // === SCOREBOARD ===
   if (typeof initScoreboard === "function") initScoreboard();
 
-  // === POPUP CONFIGURAÇÃO ===
   const configPopup = document.getElementById("configPopup");
   const confirmConfigBtn = document.getElementById("confirmConfig");
   const closeConfigBtn = document.getElementById("closeConfig");
@@ -105,7 +97,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // === BOTÕES DO MENU DE UTILIZADOR ===
   const openConfigBtn = document.getElementById("openConfig");
   const openRulesBtn = document.getElementById("openRules");
   const openScoresBtn = document.getElementById("openScores");
@@ -137,8 +128,7 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Menus e login configurados, popup ativo.");
 });
 
-// === FUNÇÕES DO JOGO ===
-
+// inicia um novo jogo com as opções escolhidas
 function startGame() {
   const size = parseInt(document.getElementById("boardSize").value);
   const firstPlayer = document.getElementById("firstPlayer").value;
@@ -159,17 +149,18 @@ function startGame() {
   showMessage("Jogo iniciado!");
 }
 
+// mostra uma mensagem na área do jogo
 function showMessage(msg) {
   const area = document.getElementById("messageArea");
   if (area) area.innerText = msg;
 }
 
+// tenta passar a vez, se não houver jogadas válidas
 function passTurn() {
   if (gameState.diceValue === null) {
     showMessage("Tens de lançar o dado antes de passar a vez.");
     return;
   }
-
 
   if (gameState.extramove === true) {
     gameState.extramove = false;
@@ -192,6 +183,7 @@ function passTurn() {
   nextTurn();
 }
 
+// termina o jogo porque o jogador desistiu
 function giveUp() {
   if (!confirm("Tens a certeza que queres desistir?")) return;
 

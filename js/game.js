@@ -1,3 +1,4 @@
+// representação de uma peça do tabuleiro
 class Piece {
   constructor(color) {
     this.color = color;
@@ -23,6 +24,7 @@ let gameState = {
   bluePieces: new Map(),
 };
 
+// altera o valor do input de tamanho do tabuleiro
 function changeSize(delta) {
   const input = document.getElementById('boardSize');
   const min = parseInt(input.min);
@@ -32,6 +34,7 @@ function changeSize(delta) {
   input.value = value;
 }
 
+// repõe a interface para estado jogável num novo jogo
 function resetGameUI() {
   document.getElementById("rollDiceBtn").disabled = false;
   document.getElementById("passTurnBtn").disabled = false;
@@ -46,6 +49,7 @@ function resetGameUI() {
   document.getElementById('diceResult').innerText = '';
 }
 
+// inicializa o estado e as peças para uma partida
 function initGame(size, config) {
   showMessage("Novo Jogo Iniciado.");
   resetGameUI();
@@ -53,7 +57,6 @@ function initGame(size, config) {
   gameState.size = size;
   gameState.board = initPieces(size);
 
-  // quem começa
   gameState.currentPlayer = config.firstPlayer;
   gameState.players = {
     human: config.humanColor,
@@ -73,7 +76,7 @@ function initGame(size, config) {
     `Lance o dado, ${gameState.currentPlayer}`;
 }
 
-
+// cria as peças iniciais nas linhas 0 e 3
 function initPieces(size) {
   const board = Array.from({ length: 4 }, () => Array(size).fill(null));
 
@@ -107,19 +110,22 @@ function initPieces(size) {
   return board;
 }
 
+// devolve o mapa de peças do adversário
 function getAdversaryMapColor(color){
   return color === 'blue' ? gameState.redPieces : gameState.bluePieces;
 }
 
+// devolve o mapa de peças da cor indicada
 function getPiecesMapByColor(color) {
   return color === 'blue' ? gameState.bluePieces : gameState.redPieces;
 }
 
+// devolve a linha inicial para a cor dada
 function getStartRowByColor(color) {
   return color === 'blue' ? 3 : 0;
 }
 
-
+// verifica se existe alguma peça dessa cor na linha inicial
 function anyInStartRow(color) {
   const map = getPiecesMapByColor(color);
   const startRow = getStartRowByColor(color);
@@ -129,11 +135,10 @@ function anyInStartRow(color) {
   return false;
 }
 
-
+// alterna a vez entre humano e IA
 function nextTurn() {
   gameState.currentPlayer =
     gameState.currentPlayer === 'human' ? 'ai' : 'human';
-
 
   gameState.currentColor = gameState.players[gameState.currentPlayer];
 
@@ -150,6 +155,7 @@ function nextTurn() {
   }
 }
 
+// verifica condição de vitória e termina o jogo se aplicável
 function checkWin() {
   let hasBlue = false;
   let hasRed = false;
