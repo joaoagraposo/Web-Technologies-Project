@@ -15,4 +15,5 @@
 
 ![alt text](image-2.png)
 
-
+- No one can move to the 4th line, blue cannot return there and red cannot reach it.
+- better user experience, buttons location more logging
