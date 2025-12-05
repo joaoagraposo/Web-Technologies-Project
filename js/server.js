@@ -1,117 +1,115 @@
 const SERVER = "http://twserver.alunos.dcc.fc.up.pt:8008";
 
-/**
- * Função auxiliar para pedidos POST em JSON
- */
-async function post(path, bodyObj) {
+/* POST helper */
+async function post(path, body) {
     try {
         const response = await fetch(`${SERVER}/${path}`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(bodyObj)
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
         });
-
-        const data = await response.json();
-        return data; // normalmente {} ou { error: "..." }
-
-    } catch (error) {
-        console.error(`Erro no pedido POST /${path}:`, error);
+        return response.json();
+    } catch (err) {
         return { error: "Network error" };
     }
 }
 
-/**
- * Função auxiliar para pedidos GET com query string
- */
+/* GET helper */
 async function get(path, params = {}) {
-    const query = new URLSearchParams(params).toString();
-    const url = query ? `${SERVER}/${path}?${query}` : `${SERVER}/${path}`;
-
+    const qs = new URLSearchParams(params);
     try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error(`Erro no pedido GET /${path}:`, error);
+        const response = await fetch(`${SERVER}/${path}?${qs}`);
+        return response.json();
+    } catch (err) {
         return { error: "Network error" };
     }
 }
 
-/**
- * register
- * Regista/verifica um jogador com nick + password.
- * args: nick, password (strings)
- */
+/* ------------------- register ------------------- */
 export function register(nick, password) {
-    if (typeof nick !== "string" || typeof password !== "string") {
-        return Promise.resolve({ error: "Arguments must be strings" });
-    }
     return post("register", { nick, password });
 }
 
-/**
- * join
- * Entra num jogo de um certo grupo.
- * args: group (número ou string), nick, password
- * normalmente resposta tem algo tipo { game: "id-do-jogo" } ou error
+/* ------------------- join ----------------------- */
+/*
+ * Pedido correto segundo enunciado:
+ * {
+ *   "group": <int>,
+ *   "nick": "<string>",
+ *   "password": "<string>",
+ *   "size": <int-impar>
+ * }
  */
-export function join(group, nick, password) {
-    return post("join", { group, nick, password });
+export function join(group, size, nick, password) {
+    return post("join", { group, size, nick, password });
 }
 
-/**
- * leave
- * Sai de um jogo em curso.
- * args: game (id do jogo), nick, password
+/* ------------------- leave ----------------------- */
+/*
+ * {
+ *   "nick": "...",
+ *   "password": "...",
+ *   "game": "..."
+ * }
  */
 export function leave(game, nick, password) {
-    return post("leave", { game, nick, password });
+    return post("leave", { nick, password, game });
 }
 
-/**
- * roll
- * Exemplo: se o teu jogo tiver um lançamento de dados / rolagem.
- * args: game, nick, password, info extra da jogada (opcional)
- * Ajusta o body conforme o enunciado do teu jogo.
+/* ------------------- roll ------------------------ */
+/*
+ * {
+ *   "nick": "...",
+ *   "password": "...",
+ *   "game": "..."
+ * }
  */
-export function roll(game, nick, password, extra = {}) {
-    return post("roll", { game, nick, password, ...extra });
+export function roll(game, nick, password) {
+    return post("roll", { nick, password, game });
 }
 
-/**
- * notify
- * Notifica o servidor de uma jogada.
- * args: game, nick, password, move (objeto com info da jogada)
+/* ---------------- notify (mover peça) ------------ */
+/*
+ * IMPORTANTE:
+ *  O pedido NÃO envia "step"
+ *  O pedido NÃO envia "move"
+ *  Somente:
+ *  {
+ *      "nick": "...",
+ *      "password": "...",
+ *      "game": "...",
+ *      "cell": <int>
+ *  }
  */
-export function notify(game, nick, password, move) {
-    return post("notify", { game, nick, password, move });
+export function notify(game, nick, password, cell) {
+    return post("notify", { nick, password, game, cell });
 }
 
-/**
- * pass
- * Passar a vez (se o jogo tiver esse conceito).
- * args: game, nick, password
+/* ---------------- pass ---------------------------- */
+/*
+ * Quando jogador passa:
+ * {
+ *   "nick": "...",
+ *   "password": "...",
+ *   "game": "..."
+ * }
  */
 export function pass(game, nick, password) {
-    return post("pass", { game, nick, password });
+    return post("pass", { nick, password, game });
 }
 
-/**
- * update
- * Vai buscar atualizações do estado do jogo (long polling).
- * args: game, nick (normalmente o servidor pede pelo menos o game, às vezes também o nick)
+/* ---------------- update (long-polling) ----------- */
+/*
+ * GET: /update?nick=...&game=...
  */
 export function update(game, nick) {
-    return get("update", { game, nick });
+    return get("update", { nick, game });
 }
 
-/**
- * ranking
- * Vai buscar ranking do grupo.
- * args: group
+/* ---------------- ranking -------------------------- */
+/*
+ * GET ranking?group=<int>&size=<int>
  */
-export function ranking(group) {
-    return get("ranking", { group });
+export function ranking(group, size) {
+    return get("ranking", { group, size });
 }
