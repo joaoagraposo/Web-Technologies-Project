@@ -211,3 +211,28 @@ button:hover {
   outline: 3px solid limegreen;
   background-color: #caffbf !important;
 }
+
+/* === ESTADOS DAS PEÇAS === */
+/* Não movida: opacidade total, borda sutil */
+.piece.not-moved {
+  opacity: 1;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+/* Já movida: ligeiramente transparente */
+.piece.moved {
+  opacity: 0.75;
+}
+
+/* Já esteve na última linha (4ª): borda dourada */
+.piece.last-row {
+  opacity: 0.85;
+  border: 3px solid gold;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 2px 6px rgba(0,0,0,.25);
+}
+
+/* === DESTAQUE SELEÇÃO DO ADVERSÁRIO === */
+.highlight-opponent {
+  outline: 3px solid orange;
+  background-color: #ffecd2 !important;
+}

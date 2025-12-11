@@ -24,7 +24,7 @@ function renderPieces(boardState) {
     const c = Number(cell.dataset.col);
 
     cell.innerHTML = '';
-    cell.classList.remove('highlight-select', 'highlight-move');
+    cell.classList.remove('highlight-select', 'highlight-move', 'highlight-opponent');
 
     const occupant = boardState[r][c];
     if (!occupant) return;
@@ -34,12 +34,29 @@ function renderPieces(boardState) {
     token.className = `piece ${color}`;
     token.setAttribute('aria-label', `${color} piece`);
 
+    // Aplicar classes de estado visual
+    if (typeof occupant === 'object') {
+      if (occupant.hasVisitedLastRow) {
+        token.classList.add('last-row');
+      } else if (occupant.hasMoved) {
+        token.classList.add('moved');
+      } else {
+        token.classList.add('not-moved');
+      }
+    }
+
     cell.appendChild(token);
   });
 }
 
 // trata cliques nas casas: selecionar peça ou confirmar destino
 function onCellClick(e) {
+  // Verificar se é modo online e se é a vez do jogador
+  if (onlineState.isOnline && !onlineState.myTurn) {
+    showMessage("Não é a tua vez.");
+    return;
+  }
+
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('highlight-select', 'highlight-move');
   });
@@ -104,27 +121,35 @@ function moveStep(row, col, size, color) {
     return { row, col: nextCol };
   }
 
+  // Transições entre linhas quando chega à extremidade
   if (color === 'blue') {
+    // Blue: 1ª=row3, 2ª=row2, 3ª=row1, 4ª=row0
     if (row === 0) {
-      return { row: 3, col };
+      // 4ª linha → volta para 3ª linha (row 1)
+      return { row: 1, col };
     }
     if (row === 1) {
+      // 3ª linha → pode ir para 4ª (row 0) OU 2ª (row 2)
       return [
         { row: 0, col },
         { row: 2, col },
       ];
     }
+    // row 2 (2ª) → row 1 (3ª), row 3 (1ª) → row 2 (2ª)
     return { row: row - 1, col };
   } else {
+    // Red: 1ª=row0, 2ª=row1, 3ª=row2
+    // REGRA: Red NUNCA pode entrar na 4ª linha (row 3)
     if (row === 3) {
-      return { row: 0, col };
+      // Se red estiver em row 3 (não deveria acontecer), volta para row 2
+      return { row: 2, col };
     }
     if (row === 2) {
-      return [
-        { row: 3, col },
-        { row: 1, col },
-      ];
+      // 3ª linha → só pode ir para 2ª linha (row 1)
+      // Red não pode ir para a 4ª linha (row 3)
+      return { row: 1, col };
     }
+    // row 1 (2ª) → row 2 (3ª), row 0 (1ª) → row 1 (2ª)
     return { row: row + 1, col };
   }
 }
@@ -174,13 +199,24 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
     positions = nextPositions;
   }
 
-  const validDests = positions.filter(p => {
+  // Filtrar destinos válidos
+  let validDests = positions.filter(p => {
     const target = gameState.board[p.row][p.col];
     return !target || target.color !== color;
   });
 
+  // Regra: "As peças entram apenas uma vez na 4ª linha"
+  // Só bloquear reentrada se a peça JÁ SAIU da 4ª linha (não se ainda está lá)
+  const lastRow = (color === 'blue') ? 0 : 3;
+  const currentlyInLastRow = (row === lastRow);
+
+  if (piece.hasVisitedLastRow && !currentlyInLastRow) {
+    // Peça já visitou E já saiu da 4ª linha, não pode voltar
+    validDests = validDests.filter(p => p.row !== lastRow);
+  }
+
   if (validDests.length === 0) {
-    if (!silent) showMessage('Casa ocupada pela tua peça.');
+    if (!silent) showMessage('Casa ocupada pela tua peça ou sem destino válido.');
     return null;
   }
 
@@ -231,16 +267,53 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
 }
 
 // aplica uma jogada: move a peça, trata capturas e jogadas extra
-function applyMove(move) {
+async function applyMove(move) {
   const { from, to, piece } = move;
 
+  // Modo online - notificar servidor
+  if (onlineState.isOnline) {
+    if (!onlineState.myTurn) {
+      showMessage("Não é a tua vez.");
+      return;
+    }
+
+    // Converter row,col para índice linear da célula
+    const cell = to.row * gameState.size + to.col;
+
+    const res = await fetch(`http://twserver.alunos.dcc.fc.up.pt:8008/notify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nick: onlineState.nick,
+        password: onlineState.password,
+        game: onlineState.gameId,
+        cell: cell
+      })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      showMessage("Erro ao mover: " + data.error);
+    }
+
+    // Limpar preview
+    gameState.movePreview = null;
+    document.querySelectorAll('.cell').forEach(c => {
+      c.classList.remove('highlight-select', 'highlight-move');
+    });
+
+    // O tabuleiro será atualizado pelo próximo update()
+    return;
+  }
+
+  // Modo local (lógica original)
   const target = gameState.board[to.row][to.col];
   if (target && target.color === piece.color) {
     showMessage('Casa ocupada pela tua peça.');
     return;
   }
 
-  if(target && target.color !== piece.color){
+  if (target && target.color !== piece.color) {
     const adversaryMap = getAdversaryMapColor(piece.color);
     adversaryMap.delete(target);
   }
@@ -258,6 +331,13 @@ function applyMove(move) {
   }
 
   piece.hasMoved = true;
+
+  // Verificar se a peça chegou à 4ª linha (última linha do adversário)
+  const lastRow = (piece.color === 'blue') ? 0 : 3;
+  if (to.row === lastRow) {
+    piece.hasVisitedLastRow = true;
+  }
+
   gameState.movePreview = null;
 
   renderPieces(gameState.board);
@@ -284,7 +364,7 @@ function applyMove(move) {
       return;
     }
   }
-  
+
   nextTurn();
 }
 

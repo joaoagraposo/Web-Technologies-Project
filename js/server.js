@@ -26,7 +26,7 @@ async function get(path, params = {}) {
 }
 
 /* ------------------- register ------------------- */
-export function register(nick, password) {
+function register(nick, password) {
     return post("register", { nick, password });
 }
 
@@ -40,7 +40,7 @@ export function register(nick, password) {
  *   "size": <int-impar>
  * }
  */
-export function join(group, size, nick, password) {
+function join(group, size, nick, password) {
     return post("join", { group, size, nick, password });
 }
 
@@ -52,7 +52,7 @@ export function join(group, size, nick, password) {
  *   "game": "..."
  * }
  */
-export function leave(game, nick, password) {
+function leave(game, nick, password) {
     return post("leave", { nick, password, game });
 }
 
@@ -64,7 +64,7 @@ export function leave(game, nick, password) {
  *   "game": "..."
  * }
  */
-export function roll(game, nick, password) {
+function roll(game, nick, password) {
     return post("roll", { nick, password, game });
 }
 
@@ -81,7 +81,7 @@ export function roll(game, nick, password) {
  *      "cell": <int>
  *  }
  */
-export function notify(game, nick, password, cell) {
+function notify(game, nick, password, cell) {
     return post("notify", { nick, password, game, cell });
 }
 
@@ -94,7 +94,7 @@ export function notify(game, nick, password, cell) {
  *   "game": "..."
  * }
  */
-export function pass(game, nick, password) {
+function pass(game, nick, password) {
     return post("pass", { nick, password, game });
 }
 
@@ -102,7 +102,7 @@ export function pass(game, nick, password) {
 /*
  * GET: /update?nick=...&game=...
  */
-export function update(game, nick) {
+function update(game, nick) {
     return get("update", { nick, game });
 }
 
@@ -110,6 +110,80 @@ export function update(game, nick) {
 /*
  * GET ranking?group=<int>&size=<int>
  */
-export function ranking(group, size) {
+function ranking(group, size) {
     return get("ranking", { group, size });
 }
+
+/* ---------------- responses ---------------------- */
+function handleRegister(res) {
+    if (res.error) return { ok: false, error: res.error };
+    return { ok: true };
+}
+
+function handleJoin(res) {
+    if (res.error) return { ok: false, error: res.error };
+    return { ok: true, game: res.game };
+}
+
+function handleLeave(res) {
+    if (res.error) return { ok: false, error: res.error };
+    return { ok: true };
+}
+
+function handleRoll(res) {
+    if (res.error) return { ok: false, error: res.error };
+    return { ok: true };
+}
+
+function handlePass(res) {
+    if (res.error) return { ok: false, error: res.error };
+    return { ok: true };
+}
+
+function handleNotify(res) {
+    if (res.error) return { ok: false, error: res.error };
+    return { ok: true };
+}
+
+function handleUpdate(res) {
+    if (res.error) return { ok: false, error: res.error };
+
+    return {
+        ok: true,
+        cell: res.cell,
+        dice: res.dice,
+        initial: res.initial,
+        mustPass: res.mustPass,
+        pieces: res.pieces,
+        players: res.players,
+        selected: res.selected,
+        step: res.step,
+        turn: res.turn,
+        winner: res.winner
+    };
+}
+
+function handleRanking(res) {
+    if (res.error) return { ok: false, error: res.error };
+    return { ok: true, ranking: res.ranking };
+}
+
+// Expor funções globalmente para uso em app.js
+window.server = {
+    register,
+    join,
+    leave,
+    roll,
+    notify,
+    pass,
+    update,
+    ranking,
+    handleRegister,
+    handleJoin,
+    handleLeave,
+    handleRoll,
+    handlePass,
+    handleNotify,
+    handleUpdate,
+    handleRanking
+};

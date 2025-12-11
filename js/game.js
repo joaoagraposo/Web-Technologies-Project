@@ -2,7 +2,8 @@
 class Piece {
   constructor(color) {
     this.color = color;
-    this.hasMoved = false; 
+    this.hasMoved = false;        // já foi movida pelo menos uma vez
+    this.hasVisitedLastRow = false; // já esteve na 4ª linha (última)
   }
 }
 
@@ -111,7 +112,7 @@ function initPieces(size) {
 }
 
 // devolve o mapa de peças do adversário
-function getAdversaryMapColor(color){
+function getAdversaryMapColor(color) {
   return color === 'blue' ? gameState.redPieces : gameState.bluePieces;
 }
 
@@ -186,6 +187,15 @@ function checkWin() {
     });
 
     saveScore(winnerName, "Vitória");
+
+    // Mostrar popup de configuração após 2 segundos para iniciar novo jogo
+    setTimeout(() => {
+      const configPopup = document.getElementById("configPopup");
+      if (configPopup) {
+        configPopup.classList.remove("hidden");
+      }
+    }, 1500);
+
     return true;
   }
   return false;
