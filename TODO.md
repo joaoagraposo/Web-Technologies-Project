@@ -39,3 +39,5 @@
     - notify (error)
     - update (cell, dice, error, initial, mustPass, pieces, players, selected, step, turn, winner)
     - ranking (error, ranking)
+
+- O servidor deverá estar estruturado em módulos. O ficheiro principal, que carrega os restantes módulos, define a função de processamento de pedido e inicia a sua escuta, deve chamar-se: index.js
