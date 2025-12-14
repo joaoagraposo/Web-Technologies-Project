@@ -1,4 +1,5 @@
 const SERVER = "http://twserver.alunos.dcc.fc.up.pt:8008";
+//const SERVER = "http://localhost:8118";
 
 /* POST helper */
 async function post(path, body) {
@@ -70,19 +71,16 @@ function roll(game, nick, password) {
 
 /* ---------------- notify (mover peça) ------------ */
 /*
- * IMPORTANTE:
- *  O pedido NÃO envia "step"
- *  O pedido NÃO envia "move"
- *  Somente:
+ * Estrutura segundo enunciado:
  *  {
  *      "nick": "...",
  *      "password": "...",
  *      "game": "...",
- *      "cell": <int>
+ *      "move": { "cell": { "square": <int>, "position": <int> } }
  *  }
  */
-function notify(game, nick, password, cell) {
-    return post("notify", { nick, password, game, cell });
+function notify(game, nick, password, move) {
+    return post("notify", { nick, password, game, move });
 }
 
 /* ---------------- pass ---------------------------- */
@@ -170,6 +168,7 @@ function handleRanking(res) {
 
 // Expor funções globalmente para uso em app.js
 window.server = {
+    SERVER,
     register,
     join,
     leave,

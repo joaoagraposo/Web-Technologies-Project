@@ -2,7 +2,7 @@
 function createBoard(size) {
   const board = document.getElementById('board');
   board.innerHTML = '';
-  board.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+  board.style.gridTemplateColumns = `repeat(${size}, 80px)`;
 
   for (let row = 0; row < 4; row++) {
     for (let col = 0; col < size; col++) {
@@ -23,18 +23,35 @@ function renderPieces(boardState) {
     const r = Number(cell.dataset.row);
     const c = Number(cell.dataset.col);
 
-    cell.innerHTML = '';
+    const occupant = boardState[r][c];
+
+    // Remover classes de highlight antigas
     cell.classList.remove('highlight-select', 'highlight-move', 'highlight-opponent');
 
-    const occupant = boardState[r][c];
-    if (!occupant) return;
+    // Se não há ocupante, limpar conteúdo da célula
+    if (!occupant) {
+      if (cell.firstChild) cell.innerHTML = '';
+      return;
+    }
 
     const color = typeof occupant === 'string' ? occupant : occupant.color;
-    const token = document.createElement('div');
-    token.className = `piece ${color}`;
-    token.setAttribute('aria-label', `${color} piece`);
 
-    // Aplicar classes de estado visual
+    // Obter ou criar o token da peça
+    let token = cell.querySelector('.piece');
+
+    // Se não existir ou for da cor errada, recriar
+    if (!token || !token.classList.contains(color)) {
+      cell.innerHTML = ''; // Limpar conteúdo antigo
+      token = document.createElement('div');
+      token.className = `piece ${color}`;
+      token.setAttribute('aria-label', `${color} piece`);
+      cell.appendChild(token);
+    }
+
+    // Atualizar classes de estado visual sem recriar o elemento
+    // Remover classes de estado antigas
+    token.classList.remove('last-row', 'moved', 'not-moved');
+
     if (typeof occupant === 'object') {
       if (occupant.hasVisitedLastRow) {
         token.classList.add('last-row');
@@ -44,8 +61,6 @@ function renderPieces(boardState) {
         token.classList.add('not-moved');
       }
     }
-
-    cell.appendChild(token);
   });
 }
 
@@ -69,7 +84,35 @@ function onCellClick(e) {
   if (dice === null) return showMessage("Ainda não lançaste o dado.");
   if (gameState.currentPlayer !== 'human') return showMessage("Não é a tua vez.");
 
-  const humanColor = gameState.players.human;
+  // No modo online, delegar lógica para o servidor (seleção e movimento)
+  if (onlineState.isOnline) {
+    const squareIndex = row * gameState.size + col;
+
+    // Enviar notificação para o servidor
+    // O servidor gere o estado (from -> to) e valida
+    const moveData = {
+      cell: {
+        square: squareIndex,
+        position: squareIndex
+      }
+    };
+
+    window.server.notify(
+      onlineState.gameId,
+      onlineState.nick,
+      onlineState.password,
+      moveData
+    ).then(res => {
+      if (res.error) showMessage(res.error);
+      // O update SSE tratará de atualizar o tabuleiro
+    }).catch(err => {
+      showMessage("Erro de comunicação ao selecionar/mover.");
+    });
+
+    return; // Ignorar lógica local
+  }
+
+  let humanColor = gameState.players.human;
 
   if (gameState.movePreview) {
     const { from, options, piece: previewPiece } = gameState.movePreview;
@@ -278,22 +321,29 @@ async function applyMove(move) {
     }
 
     // Converter row,col para índice linear da célula
-    const cell = to.row * gameState.size + to.col;
+    const squareIndex = to.row * gameState.size + to.col;
 
-    const res = await fetch(`http://twserver.alunos.dcc.fc.up.pt:8008/notify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nick: onlineState.nick,
-        password: onlineState.password,
-        game: onlineState.gameId,
-        cell: cell
-      })
-    });
-    const data = await res.json();
+    // Estrutura exigida pelo enunciado
+    const moveData = {
+      cell: {
+        square: squareIndex,
+        position: squareIndex // Simplificação (assumindo 1 peça/casa)
+      }
+    };
 
-    if (data.error) {
-      showMessage("Erro ao mover: " + data.error);
+    try {
+      const res = await window.server.notify(
+        onlineState.gameId,
+        onlineState.nick,
+        onlineState.password,
+        moveData
+      );
+
+      if (res.error) {
+        showMessage("Erro ao mover: " + res.error);
+      }
+    } catch (err) {
+      showMessage("Erro de rede ao notificar jogada.");
     }
 
     // Limpar preview

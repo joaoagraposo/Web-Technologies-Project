@@ -1,0 +1,1102 @@
+{
+  "d207f16f8d220a8bd5024d2532aa3c88": {
+    "id": "d207f16f8d220a8bd5024d2532aa3c88",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "joao",
+    "turn": "joao",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "gus",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765737374993
+  },
+  "20ab9dd1220c83c3d3cec66a4e01facc": {
+    "id": "20ab9dd1220c83c3d3cec66a4e01facc",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "joao": "red",
+      "gus": "blue"
+    },
+    "initial": "joao",
+    "turn": "joao",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": {
+      "value": {
+        "stickValues": [
+          1,
+          1,
+          0,
+          1
+        ],
+        "value": 3,
+        "keepPlaying": false
+      },
+      "id": 1765737687532
+    },
+    "mustPass": true,
+    "winner": "joao",
+    "step": "from",
+    "selected": [],
+    "createdAt": 1765737681749
+  },
+  "ada6759b3284aeb7d005227b0162252f": {
+    "id": "ada6759b3284aeb7d005227b0162252f",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "gus",
+    "turn": "joao",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "gus",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765737862396
+  },
+  "307601e06b1a41926222faf09a211063": {
+    "id": "307601e06b1a41926222faf09a211063",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "joao",
+    "turn": "joao",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": {
+      "value": {
+        "stickValues": [
+          0,
+          1,
+          0,
+          0
+        ],
+        "value": 1,
+        "keepPlaying": true
+      },
+      "id": 1765738169804
+    },
+    "mustPass": true,
+    "winner": "gus",
+    "step": "from",
+    "selected": [],
+    "createdAt": 1765738097274
+  },
+  "ae41ac2a42438b4b3103e0891a3f6dcd": {
+    "id": "ae41ac2a42438b4b3103e0891a3f6dcd",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "joao": "red",
+      "gus": "blue"
+    },
+    "initial": "gus",
+    "turn": "gus",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": {
+      "stickValues": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "value": 1,
+      "keepPlaying": true,
+      "id": 1765738468652
+    },
+    "mustPass": false,
+    "winner": "gus",
+    "step": "from",
+    "selected": [
+      27
+    ],
+    "createdAt": 1765738422579
+  },
+  "b7db0b8c290ed29f385a5aa13aac9c7a": {
+    "id": "b7db0b8c290ed29f385a5aa13aac9c7a",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "joao",
+    "turn": "gus",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": {
+      "stickValues": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "value": 1,
+      "keepPlaying": true,
+      "id": 1765738669158
+    },
+    "mustPass": false,
+    "winner": "joao",
+    "step": "from",
+    "selected": [
+      0
+    ],
+    "createdAt": 1765738659951
+  },
+  "39052c238e520e11a68015108ce9082d": {
+    "id": "39052c238e520e11a68015108ce9082d",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "joao",
+    "turn": "gus",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": {
+      "stickValues": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "value": 1,
+      "keepPlaying": true,
+      "id": 1765738837529
+    },
+    "mustPass": false,
+    "winner": "joao",
+    "step": "from",
+    "selected": [
+      0
+    ],
+    "createdAt": 1765738825217
+  },
+  "c716366b2bfc6f408c0f64acd6fb73e8": {
+    "id": "c716366b2bfc6f408c0f64acd6fb73e8",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "gus",
+    "turn": "gus",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "gus",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765739001683
+  },
+  "0f13d5ef4deddfb938e324389bc1cbf7": {
+    "id": "0f13d5ef4deddfb938e324389bc1cbf7",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "gus",
+    "turn": "gus",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      }
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "gus",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765739039459
+  },
+  "9f5c7735fd1bd643239586cae1f9494e": {
+    "id": "9f5c7735fd1bd643239586cae1f9494e",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gus": "red",
+      "joao": "blue"
+    },
+    "initial": "gus",
+    "turn": "gus",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      {
+        "color": "red",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "joao",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765739078964
+  }
+}

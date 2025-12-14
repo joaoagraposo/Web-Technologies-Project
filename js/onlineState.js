@@ -7,7 +7,9 @@ const onlineState = {
     group: null,            // número do grupo para matchmaking
     pollingActive: false,   // controla o loop de update
     myTurn: false,          // true quando é a vez deste jogador
-    myColor: null           // cor atribuída pelo servidor
+    myTurn: false,          // true quando é a vez deste jogador
+    myColor: null,          // cor atribuída pelo servidor
+    lastProcessedDiceId: null // ID do último lançamento de dado processado
 };
 
 // Exporta para uso global

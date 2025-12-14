@@ -1,238 +1,555 @@
+/* ============================================
+   LAYOUT PRINCIPAL
+   ============================================ */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #fafafa;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   margin: 0;
+  min-height: 100vh;
+  color: #fff;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ============================================
+   SIDEBAR ESQUERDA - CONFIGURAÇÕES
+   ============================================ */
+.sidebar-left {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
-/* HEADER + USER MENU */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 90%;
-  margin: 10px auto;
-}
-.logo {
-  height: 50px;
-}
-#userCorner { position: relative; }
-#userIcon {
-  cursor: pointer;
-  font-size: 32px;
-  color: #1c4d80;
-}
-#userMenu {
-  position: absolute;
-  right: 0;
-  top: 45px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  width: 220px;
-  padding: 10px;
-  z-index: 2000;
-}
-#userMenu input {
-  width: 95%;
-  margin: 4px 0;
-  padding: 5px;
-  border-radius: 4px;
-  border: 1px solid #aaa;
-}
-#userMenu button {
-  display: block;
-  width: 100%;
-  border: none;
-  background-color: #1c4d80;
-  color: white;
-  border-radius: 5px;
-  padding: 6px;
-  margin-top: 8px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-#userMenu button:hover { background-color: #2b6cb0; }
-
-button {
-  cursor: pointer;
-  border-radius: 6px;
-  border: none;
-  padding: 8px 12px;
-  background: linear-gradient(90deg, #1c4d80, #005fa3);
-  color: white;
-  font-weight: bold;
-  transition: transform 0.1s, background 0.3s;
-}
-button:hover {
-  background: linear-gradient(90deg, #007ad1, #003f76);
-  transform: scale(1.05);
-}
-
-/* GAME AREA */
-#board {
-  display: grid;
-  gap: 5px;
-  margin-top: 20px;
-}
-.cell {
-  width: 50px;
-  height: 50px;
-  border: 1px solid #444;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #eee;
-  cursor: pointer;
-}
-.piece {
-  width: 70%;
-  height: 70%;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25), inset 0 2px 2px rgba(255,255,255,.4);
-}
-.piece.red { background: radial-gradient(circle at 35% 35%, #ff8a8a, #b30021); }
-.piece.blue { background: radial-gradient(circle at 35% 35%, #a0c4ff, #1c4d80); }
-
-/* PANELS */
-.panel {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  z-index: 1000;
-  max-width: 600px;
-  overflow-y: auto;
-}
-.panel.hidden { display: none; }
-
-/* Popup Configuração */
-#configPopup {
+.sidebar-left .logo-section {
   text-align: center;
-  width: 280px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-left .logo {
+  height: 60px;
+  margin-bottom: 8px;
+}
+
+.sidebar-left h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #64b5f6;
+}
+
+.config-section {
+  flex: 1;
+}
+
+.config-section h3 {
+  margin: 0 0 15px 0;
+  color: #90caf9;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.config-row {
+  margin-bottom: 15px;
+}
+
+.config-row label {
+  display: block;
+  margin-bottom: 5px;
+  color: #b0bec5;
+  font-size: 13px;
+}
+
+.config-row select,
+.config-row input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+}
+
+.config-row select option {
+  background: #1a1a2e;
+  color: #fff;
 }
 
 .size-control {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin: 8px 0;
+  gap: 10px;
 }
 
 .size-control button {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   font-size: 18px;
   padding: 0;
 }
 
-#boardSize {
+.size-control input {
   width: 60px;
   text-align: center;
+}
+
+#startGameBtn {
+  width: 100%;
+  padding: 14px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  margin-top: 20px;
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-/* Painel Configuração Buttons */
-.config-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 15px;
+#startGameBtn:hover {
+  background: linear-gradient(135deg, #66bb6a 0%, #388e3c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
 }
 
-.config-buttons button {
+/* ============================================
+   ÁREA CENTRAL - JOGO
+   ============================================ */
+.main-content {
   flex: 1;
-  padding: 8px;
-}
-
-.hidden { display: none; }
-
-.config-row {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 12px 0;
+  justify-content: center;
+  padding: 20px;
 }
 
-.config-row label {
-  margin-bottom: 4px;
-  font-weight: bold;
-}
-
-.config-row select,
-.config-row input {
-  width: 80%;
-  padding: 5px;
-}
-
-/* === CONTROLOS DE JOGO === */
-#controls {
-  margin-top: 20px;
+#game {
   display: flex;
-  justify-content: center;   /* centra os botões horizontalmente */
-  gap: 10px;                 /* espaço entre botões */
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-#controls button {
-  min-width: 120px;
+#board {
+  display: grid;
+  gap: 6px;
+  margin: 20px auto;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 16px;
 }
 
-/* === ÁREA DE MENSAGENS === */
-#diceResult,
-#messageArea {
-  margin-top: 10px;
-  text-align: center;        /* centra o texto */
-  font-weight: bold;
-  color: #000000;
+.cell {
+  width: 80px;
+  height: 80px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(145deg, #2a2a4a, #1a1a3a);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-/* Pequeno ajuste se quiseres o texto mais separado */
-#diceResult {
-  margin-bottom: 5px;
+.cell:hover {
+  background: linear-gradient(145deg, #3a3a6a, #2a2a5a);
 }
 
+.piece {
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  transition: transform 0.2s;
+}
+
+.piece:hover {
+  transform: scale(1.1);
+}
+
+.piece.red {
+  background: radial-gradient(circle at 35% 35%, #ff6b6b, #c0392b);
+}
+
+.piece.blue {
+  background: radial-gradient(circle at 35% 35%, #74b9ff, #0984e3);
+}
+
+/* Estados das peças - 3 estados distintos */
+
+/* 1. NÃO MOVIDA - borda branca sólida, totalmente opaca */
+.piece.not-moved {
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* 2. JÁ MOVIDA (em movimento) - sem borda, semi-transparente */
+.piece.moved {
+  opacity: 0.7;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 3. CHEGOU À ÚLTIMA LINHA - borda dourada brilhante */
+.piece.last-row {
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.4);
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+
+  to {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 215, 0, 0.5);
+  }
+}
+
+/* Destaques */
 .highlight-select {
-  outline: 3px solid yellow;
-  background-color: #fff8a5 !important;
+  outline: 3px solid #ffd700;
+  background: rgba(255, 215, 0, 0.2) !important;
 }
 
 .highlight-move {
-  outline: 3px solid limegreen;
-  background-color: #caffbf !important;
+  outline: 3px solid #00ff88;
+  background: rgba(0, 255, 136, 0.2) !important;
 }
 
-/* === ESTADOS DAS PEÇAS === */
-/* Não movida: opacidade total, borda sutil */
-.piece.not-moved {
-  opacity: 1;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-}
-
-/* Já movida: ligeiramente transparente */
-.piece.moved {
-  opacity: 0.75;
-}
-
-/* Já esteve na última linha (4ª): borda dourada */
-.piece.last-row {
-  opacity: 0.85;
-  border: 3px solid gold;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 2px 6px rgba(0,0,0,.25);
-}
-
-/* === DESTAQUE SELEÇÃO DO ADVERSÁRIO === */
 .highlight-opponent {
-  outline: 3px solid orange;
-  background-color: #ffecd2 !important;
+  outline: 3px solid #ff9800;
+  background: rgba(255, 152, 0, 0.2) !important;
+}
+
+/* Controlos do jogo */
+#controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+  width: 100%;
+  max-width: 600px;
+}
+
+#controls button {
+  flex: 1;
+  padding: 16px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#rollDiceBtn {
+  background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+}
+
+#passTurnBtn {
+  background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);
+}
+
+#giveUpBtn {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+}
+
+#controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mensagens */
+#diceResult,
+#messageArea {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* ============================================
+   SIDEBAR DIREITA - NAVEGAÇÃO + HISTÓRICO
+   ============================================ */
+.sidebar-right {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.nav-buttons button {
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.nav-buttons button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+/* Histórico de jogadas */
+.move-history {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.move-history h4 {
+  margin: 0 0 10px 0;
+  color: #90caf9;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+#moveList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+}
+
+#moveList li {
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #64b5f6;
+}
+
+#moveList li.red-move {
+  border-left-color: #f44336;
+}
+
+#moveList li.blue-move {
+  border-left-color: #2196f3;
+}
+
+#moveList li.pass-move {
+  border-left-color: #ff9800;
+  opacity: 0.7;
+}
+
+/* ============================================
+   POPUPS / MODAIS
+   ============================================ */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.modal {
+  background: linear-gradient(145deg, #1e1e3f, #2a2a5a);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal h2 {
+  margin: 0 0 20px 0;
+  color: #64b5f6;
+}
+
+.modal input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.modal input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.modal button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modal .btn-primary {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  color: white;
+}
+
+.modal .btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Win Popup */
+#winPopup .modal {
+  background: linear-gradient(145deg, #1b5e20, #2e7d32);
+}
+
+#winPopup h2 {
+  color: #ffd700;
+  font-size: 28px;
+}
+
+#winPopup .winner-name {
+  font-size: 24px;
+  color: #fff;
+  margin: 20px 0;
+}
+
+/* Panel para regras e classificações */
+.panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, #1e1e3f, #2a2a5a);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel.hidden {
+  display: none;
+}
+
+.panel h2 {
+  margin-top: 0;
+  color: #64b5f6;
+}
+
+.panel table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+.panel th,
+.panel td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel th {
+  background: rgba(255, 255, 255, 0.1);
+  color: #90caf9;
+}
+
+.panel button {
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.closePanel {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+}
+
+/* Filtros ranking */
+#rankingFilters {
+  display: flex;
+  gap: 15px;
+  margin: 15px 0;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#rankingFilters label {
+  color: #b0bec5;
+}
+
+#rankingFilters input,
+#rankingFilters select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Utilitários */
+.hidden {
+  display: none !important;
+}
+
+/* Header simples para user info */
+.user-info {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: #90caf9;
+}
+
+.user-info .nick {
+  font-weight: bold;
+  color: #4caf50;
 }

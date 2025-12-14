@@ -1,0 +1,24 @@
+{
+  "18_7": {
+    "joaoraposo": {
+      "nick": "joaoraposo",
+      "games": 1,
+      "victories": 0
+    },
+    "gustavomartins": {
+      "nick": "gustavomartins",
+      "games": 1,
+      "victories": 1
+    },
+    "joao": {
+      "nick": "joao",
+      "games": 12,
+      "victories": 5
+    },
+    "gus": {
+      "nick": "gus",
+      "games": 12,
+      "victories": 7
+    }
+  }
+}

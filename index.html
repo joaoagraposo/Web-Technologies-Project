@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Tâb</title>
+  <title>Tâb - Jogo Online</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script src="js/onlineState.js" defer></script>
@@ -14,173 +14,198 @@
   <script src="js/ai.js" defer></script>
   <script src="js/scoreboard.js" defer></script>
   <script src="js/app.js" defer></script>
-
+  <script>
+    function changeSize(delta) {
+      const input = document.getElementById("boardSize");
+      let val = parseInt(input.value) + delta;
+      if (val < 7) val = 7;
+      if (val > 15) val = 15;
+      if (val % 2 === 0) val += (delta > 0 ? 1 : -1);
+      input.value = val;
+    }
+  </script>
 </head>
 
 <body>
-  <header>
-    <div class="left-zone">
-      <img src="assets/TWLogo.png" alt="Tâb" class="logo">
-      <h1>Tâb</h1>
-    </div>
-
-    <div id="userCorner">
-      <div id="userIcon" title="Clique para abrir menu">
-        <span class="material-symbols-outlined">account_circle</span>
+  <div class="app-container">
+    <!-- SIDEBAR ESQUERDA - CONFIGURAÇÕES -->
+    <aside class="sidebar-left">
+      <div class="logo-section">
+        <img src="assets/TWLogo.png" alt="Tâb" class="logo">
+        <h1>Tâb</h1>
       </div>
-      <div id="userMenu" class="hidden">
-        <div id="userStatus">
-          <span id="loginText">Iniciar Sessão</span>
-          <span id="usernameDisplay" class="hidden"></span>
+
+      <!-- User Info -->
+      <div class="user-info" id="userInfoDisplay">
+        <span id="userStatusText">Não autenticado</span>
+      </div>
+
+      <div class="config-section">
+        <h3>⚙️ Configurações</h3>
+
+        <div class="config-row">
+          <label for="gameMode">Modo de Jogo</label>
+          <select id="gameMode">
+            <option value="local">🤖 Contra IA</option>
+            <option value="online">🌐 Jogar Online</option>
+          </select>
         </div>
-        <div id="loginBox">
-          <input type="text" id="username" placeholder="Utilizador">
-          <input type="password" id="password" placeholder="Senha">
-          <button id="loginBtn">Entrar</button>
+
+        <div class="config-row hidden" id="groupRow">
+          <label for="groupNumber">Grupo</label>
+          <input id="groupNumber" type="number" min="1" value="18" style="width: 80px;">
         </div>
-        <button id="logoutBtn" class="hidden">Terminar Sessão</button>
-        <hr>
-        <button id="openConfig">⚙️ Configurações</button>
+
+        <div class="config-row">
+          <label for="boardSize">Tamanho do Tabuleiro</label>
+          <div class="size-control">
+            <button type="button" onclick="changeSize(-2)">−</button>
+            <input id="boardSize" type="number" min="7" max="15" step="2" value="7" readonly>
+            <button type="button" onclick="changeSize(2)">+</button>
+          </div>
+        </div>
+
+        <div class="config-row" id="localOnlyOptions">
+          <label for="firstPlayer">Primeiro Jogador</label>
+          <select id="firstPlayer">
+            <option value="human">Humano</option>
+            <option value="ai">Computador</option>
+          </select>
+        </div>
+
+        <div class="config-row" id="colorRow">
+          <label for="humanColor">Cor do Humano</label>
+          <select id="humanColor">
+            <option value="blue">Azul</option>
+            <option value="red">Vermelho</option>
+          </select>
+        </div>
+
+        <div class="config-row" id="aiRow">
+          <label for="aiLevel">Nível da IA</label>
+          <select id="aiLevel">
+            <option value="easy">Fácil</option>
+            <option value="medium">Médio</option>
+          </select>
+        </div>
+
+        <button id="startGameBtn">🎮 Iniciar Jogo</button>
+      </div>
+    </aside>
+
+    <!-- ÁREA CENTRAL - JOGO -->
+    <main class="main-content">
+      <section id="game">
+        <div id="board"></div>
+
+        <div id="controls">
+          <button id="rollDiceBtn" disabled>🎲 Lançar Dado</button>
+          <button id="passTurnBtn" disabled>⏭ Passar Vez</button>
+          <button id="giveUpBtn" disabled>🚫 Desistir</button>
+        </div>
+
+        <div id="diceResult"></div>
+        <div id="messageArea">Configura e inicia um novo jogo</div>
+      </section>
+    </main>
+
+    <!-- SIDEBAR DIREITA - NAVEGAÇÃO + HISTÓRICO -->
+    <aside class="sidebar-right">
+      <div class="nav-buttons">
         <button id="openRules">📜 Instruções</button>
         <button id="openScores">🏆 Classificações</button>
+        <button id="openLogin">👤 Login / Logout</button>
       </div>
-    </div>
-  </header>
 
-  <!-- POPUP CONFIGURAÇÃO -->
-  <div id="configPopup" class="panel">
-    <h2>Configuração Inicial</h2>
-
-    <div class="config-row">
-      <label for="gameMode">Modo de Jogo:</label>
-      <select id="gameMode">
-        <option value="local">Contra IA</option>
-        <option value="online">Jogar Online</option>
-      </select>
-    </div>
-
-    <div class="config-row online-only hidden" id="groupRow">
-      <label for="groupNumber">Grupo:</label>
-      <input id="groupNumber" type="number" min="1" value="1">
-    </div>
-
-    <div class="config-row">
-      <label for="boardSize">Tamanho do tabuleiro:</label>
-      <div class="size-control">
-        <button type="button" onclick="changeSize(-2)">–</button>
-        <input id="boardSize" type="number" min="7" max="15" step="2" value="7" readonly>
-        <button type="button" onclick="changeSize(2)">+</button>
+      <div class="move-history">
+        <h4>📋 Histórico</h4>
+        <ul id="moveList">
+          <li style="opacity:0.5;">Nenhuma jogada ainda...</li>
+        </ul>
       </div>
-    </div>
+    </aside>
+  </div>
 
-    <div class="config-row">
-      <label for="firstPlayer">Primeiro jogador:</label>
-      <select id="firstPlayer">
-        <option value="human">Humano</option>
-        <option value="ai">Computador</option>
-      </select>
-    </div>
-
-    <div class="config-row">
-      <label for="humanColor">Cor do Humano:</label>
-      <select id="humanColor">
-        <option value="blue">Azul</option>
-        <option value="red">Vermelho</option>
-      </select>
-    </div>
-
-    <div class="config-row">
-      <label for="aiLevel">Nível da IA:</label>
-      <select id="aiLevel">
-        <option value="easy">Fácil</option>
-        <option value="medium">Médio</option>
-      </select>
-    </div>
-
-    <div class="config-buttons">
-      <button id="confirmConfig">Confirmar</button>
-      <button id="closeConfig">Fechar</button>
+  <!-- POPUP DE LOGIN -->
+  <div id="loginOverlay" class="overlay">
+    <div class="modal">
+      <h2>👤 Iniciar Sessão</h2>
+      <p style="color:#b0bec5; margin-bottom:20px;">Introduz as tuas credenciais para jogar online</p>
+      <input type="text" id="username" placeholder="Utilizador">
+      <input type="password" id="password" placeholder="Senha">
+      <button id="loginBtn" class="btn-primary">Entrar</button>
+      <button id="skipLoginBtn" class="btn-secondary">Jogar Offline</button>
     </div>
   </div>
 
-  <main>
-    <section id="game">
-      <div id="board"></div>
+  <!-- POPUP DE VITÓRIA -->
+  <div id="winPopup" class="overlay hidden">
+    <div class="modal">
+      <h2>🏆 Fim de Jogo!</h2>
+      <p class="winner-name" id="winnerName">Jogador venceu!</p>
+      <button id="playAgainBtn" class="btn-primary">Jogar Novamente</button>
+    </div>
+  </div>
 
-      <div id="controls">
-        <button id="rollDiceBtn">🎲 Lançar Dado</button>
-        <button id="passTurnBtn">⏭ Passar Vez</button>
-        <button id="giveUpBtn">🚫 Desistir</button>
+  <!-- PAINEL DE REGRAS -->
+  <div id="rulesPanel" class="panel hidden">
+    <h2>📜 Regras do Jogo</h2>
+    <p><strong>Descrição geral:</strong> Tâb é um jogo de tabuleiro para dois jogadores.
+      O tabuleiro tem 4 linhas e um número ímpar de colunas (entre 7 e 15).
+      Cada jogador tem tantas peças quanto o número de colunas.</p>
+
+    <p><strong>Dado de paus:</strong> São usados 4 paus, cada um com uma face clara e uma escura.
+      O número de faces claras para cima determina o valor do dado (1-4, ou 6 para yut).</p>
+
+    <p><strong>Movimentação:</strong> As peças movem-se conforme o número sorteado.
+      Um Tâb (1) permite iniciar uma nova peça. Mo (4) e Yut (6) dão jogada extra.</p>
+
+    <p><strong>Capturas:</strong> Se uma peça se move para uma casa ocupada pelo adversário,
+      a peça inimiga é capturada e removida.</p>
+
+    <p><strong>Fim de jogo:</strong> O jogo termina quando um jogador perde todas as peças.</p>
+    <button class="closePanel">Fechar</button>
+  </div>
+
+  <!-- PAINEL DE CLASSIFICAÇÕES -->
+  <div id="scoresPanel" class="panel hidden">
+    <h2>🏆 Classificações</h2>
+    <table id="scoreTable">
+      <thead>
+        <tr>
+          <th>Jogador</th>
+          <th>Resultado</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div style="margin-top:15px;">
+      <label><input type="checkbox" id="serverRanking"> Ver Ranking do Servidor</label>
+    </div>
+    <div id="rankingFilters" class="hidden">
+      <div>
+        <label for="rankingGroup">Grupo:</label>
+        <input type="number" id="rankingGroup" value="18" min="1" max="999" style="width:60px;">
       </div>
-
-      <div id="diceResult"></div>
-      <div id="messageArea"></div>
-    </section>
-  </main>
-
-  <!-- Regras / Classificações -->
-  <section id="panels">
-    <div id="rulesPanel" class="panel hidden">
-      <h2>Regras do Jogo</h2>
-      <p><strong>Descrição geral:</strong> Tâb é um jogo de tabuleiro para dois jogadores.
-        O tabuleiro tem 4 linhas e um número ímpar de colunas (entre 7 e 15, geralmente 9).
-        Cada jogador tem tantas peças quanto o número de colunas e joga com uma cor diferente.
-        O tabuleiro mostrado ao jogador está ajustado à sua perspetiva.</p>
-
-      <p><strong>Dado de paus:</strong> São usados 4 paus, cada um com uma face clara e uma escura.
-        O número de faces claras para cima determina o valor do dado (0, 1, 2, 3, ou 4), com
-        nomes e probabilidades diferentes para cada resultado.</p>
-
-      <p><strong>Movimentação:</strong> As peças movem-se conforme o número sorteado, seguindo
-        o percurso de linhas conforme as regras do jogo. Movimentos inválidos não são permitidos
-        e uma casa só pode ter uma peça.</p>
-
-      <p><strong>Capturas:</strong> Se uma peça se move para uma casa ocupada pelo adversário,
-        a peça inimiga é capturada e removida.</p>
-
-      <p><strong>Fim de jogo:</strong> O jogo termina quando um jogador perde todas as peças;
-        o outro é declarado vencedor.</p>
+      <div>
+        <label for="rankingSize">Tamanho:</label>
+        <select id="rankingSize">
+          <option value="7" selected>7</option>
+          <option value="9">9</option>
+          <option value="11">11</option>
+          <option value="13">13</option>
+          <option value="15">15</option>
+        </select>
+      </div>
+      <button id="loadRankingBtn">Carregar</button>
+    </div>
+    <div style="margin-top:15px;">
+      <button id="clearScores">Limpar</button>
       <button class="closePanel">Fechar</button>
     </div>
+  </div>
 
-    <div id="scoresPanel" class="panel hidden">
-      <h2>Classificações</h2>
-      <table id="scoreTable">
-        <thead>
-          <tr>
-            <th>Jogador</th>
-            <th>Resultado</th>
-            <th>Data</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div class="config-row" style="margin-top:10px;">
-        <label><input type="checkbox" id="serverRanking"> Ver Ranking do Servidor</label>
-      </div>
-      <div id="rankingFilters" class="hidden" style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
-        <div>
-          <label for="rankingGroup">Grupo:</label>
-          <input type="number" id="rankingGroup" value="99" min="1" max="999" style="width:60px;">
-        </div>
-        <div>
-          <label for="rankingSize">Tamanho:</label>
-          <select id="rankingSize">
-            <option value="7">7</option>
-            <option value="9" selected>9</option>
-            <option value="11">11</option>
-            <option value="13">13</option>
-            <option value="15">15</option>
-          </select>
-        </div>
-        <button id="loadRankingBtn" style="padding:4px 8px;">Carregar</button>
-      </div>
-      <div style="margin-top:10px;">
-        <button id="clearScores">Limpar Classificações</button>
-        <button class="closePanel">Fechar</button>
-      </div>
-    </div>
-  </section>
 </body>
 
 </html>

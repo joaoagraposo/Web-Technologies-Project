@@ -12,20 +12,15 @@ async function rollDice() {
       return;
     }
 
-    // Importar server dinamicamente (já está disponível via app.js)
-    const res = await fetch(`http://twserver.alunos.dcc.fc.up.pt:8008/roll`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nick: onlineState.nick,
-        password: onlineState.password,
-        game: onlineState.gameId
-      })
-    });
-    const data = await res.json();
+    // Usar o módulo server.js que tem o URL correto
+    const res = await window.server.roll(
+      onlineState.gameId,
+      onlineState.nick,
+      onlineState.password
+    );
 
-    if (data.error) {
-      showMessage("Erro ao lançar dado: " + data.error);
+    if (res.error) {
+      showMessage("Erro ao lançar dado: " + res.error);
     }
     // O valor do dado virá no próximo update()
     return;
@@ -40,6 +35,14 @@ async function rollDice() {
     gameState.extramove = extradice;
     gameState.diceValue = value;
     document.getElementById('diceResult').innerText = `Dado: ${value}`;
+
+    // Adicionar ao histórico
+    const player = gameState.currentPlayer === 'human' ? 'Humano' : 'IA';
+    const color = gameState.currentColor;
+    const extraMsg = extradice ? ' (jogada extra!)' : '';
+    if (typeof addMoveToHistory === 'function') {
+      addMoveToHistory(player, `Lançou ${value}${extraMsg}`, color);
+    }
   }
   else {
     showMessage(`Dado deste turno: ${gameState.diceValue}`);
