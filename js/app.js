@@ -1,14 +1,14 @@
 // ============================================
-// APP.JS - Inicialização e gestão da interface
+// APP.JS - Initialization and interface management
 // ============================================
 
-// Histórico de jogadas (máximo 10)
+// Move history (max 10)
 let moveHistory = [];
 
-// Cleanup quando a tab é fechada - sai do jogo automaticamente
+// Cleanup when tab is closed - auto leave game
 window.addEventListener("beforeunload", () => {
   if (onlineState.isOnline && onlineState.gameId && onlineState.nick) {
-    // Usar sendBeacon para garantir que o request é enviado mesmo ao fechar
+    // Use sendBeacon to ensure request is sent even on close
     const data = JSON.stringify({
       nick: onlineState.nick,
       password: onlineState.password,
@@ -21,7 +21,7 @@ window.addEventListener("beforeunload", () => {
 window.addEventListener("DOMContentLoaded", () => {
   console.log("App initialized - New UI");
 
-  // Elementos principais
+  // Main elements
   const loginOverlay = document.getElementById("loginOverlay");
   const loginBtn = document.getElementById("loginBtn");
   const skipLoginBtn = document.getElementById("skipLoginBtn");
@@ -49,7 +49,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // LOGIN
   // ============================================
 
-  // Função de login (reutilizável)
+  // Login function (reusable)
   async function doLogin() {
     const user = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value;
@@ -68,7 +68,7 @@ window.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Guardar credenciais
+      // Save credentials
       onlineState.nick = user;
       onlineState.password = pass;
 
@@ -84,7 +84,7 @@ window.addEventListener("DOMContentLoaded", () => {
     loginBtn.addEventListener("click", doLogin);
   }
 
-  // Enter para fazer login
+  // Enter to login
   document.getElementById("username")?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") doLogin();
   });
@@ -130,7 +130,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================
-  // MODO DE JOGO
+  // GAME MODE
   // ============================================
   if (gameModeSelect) {
     gameModeSelect.addEventListener("change", () => {
@@ -143,13 +143,13 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================
-  // INICIAR JOGO
+  // START GAME
   // ============================================
   if (startGameBtn) {
     startGameBtn.addEventListener("click", () => startGame());
   }
 
-  // Enter para iniciar jogo
+  // Enter to start game
   document.getElementById("groupNumber")?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") startGame();
   });
@@ -158,14 +158,14 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   // ============================================
-  // CONTROLOS DO JOGO
+  // GAME CONTROLS
   // ============================================
   if (rollDiceBtn) rollDiceBtn.addEventListener("click", rollDice);
   if (passTurnBtn) passTurnBtn.addEventListener("click", passTurn);
   if (giveUpBtn) giveUpBtn.addEventListener("click", giveUp);
 
   // ============================================
-  // NAVEGAÇÃO
+  // NAVIGATION
   // ============================================
   if (openRulesBtn) {
     openRulesBtn.addEventListener("click", () => {
@@ -180,7 +180,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Fechar painéis
+  // Close panels
   document.querySelectorAll(".closePanel").forEach(btn => {
     btn.addEventListener("click", () => {
       btn.closest(".panel").classList.add("hidden");
@@ -206,7 +206,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================
-// FUNÇÕES DE JOGO
+// GAME FUNCTIONS
 // ============================================
 
 async function startGame() {
@@ -277,29 +277,43 @@ async function startOnlineGame(size) {
   showMessage("Jogo encontrado! A iniciar...");
   addMoveToHistory("Sistema", "Jogo online iniciado!", "system");
 
-  onlineGameLoop();
+  // Start SSE
+  initEventSource(onlineState.gameId, onlineState.nick);
 }
 
-async function onlineGameLoop() {
-  if (!onlineState.pollingActive || !onlineState.gameId) return;
+let eventSource = null;
 
-  try {
-    const res = await window.server.update(onlineState.gameId, onlineState.nick);
-    const result = window.server.handleUpdate(res);
+function initEventSource(gameId, nick) {
+  if (eventSource) {
+    eventSource.close();
+  }
 
-    if (!result.ok) {
-      console.error("Erro no update:", result.error);
-      setTimeout(onlineGameLoop, 2000);
+  const url = `${window.server.SERVER}/update?nick=${encodeURIComponent(nick)}&game=${encodeURIComponent(gameId)}`;
+  console.log("[DEBUG] Connecting to SSE:", url);
+  eventSource = new EventSource(url);
+
+  eventSource.onopen = () => {
+    console.log("[DEBUG] SSE Connection Opened (readyState=" + eventSource.readyState + ")");
+  };
+
+  eventSource.onmessage = function (event) {
+    console.log("[DEBUG] SSE Message received", event.data);
+    const data = JSON.parse(event.data);
+
+    if (data.error) {
+      console.error("Erro SSE:", data.error);
       return;
     }
 
-    processServerUpdate(result);
+    // Process update using existing function
+    processServerUpdate(data);
 
-    if (result.winner) {
-      const isWinner = result.winner === onlineState.nick;
-      showWinPopup(result.winner, isWinner);
+    // Check win
+    if (data.winner) {
+      const isWinner = data.winner === onlineState.nick;
+      showWinPopup(data.winner, isWinner);
+      eventSource.close(); // Fechar conexão
       onlineState.pollingActive = false;
-      onlineState.isOnline = false;
 
       document.getElementById("rollDiceBtn").disabled = true;
       document.getElementById("passTurnBtn").disabled = true;
@@ -308,21 +322,24 @@ async function onlineGameLoop() {
       if (typeof saveScore === "function") {
         saveScore(onlineState.nick, isWinner ? "Vitória" : "Derrota");
       }
-      return;
     }
+  };
 
-    setTimeout(onlineGameLoop, 500);
-  } catch (err) {
-    console.error("Erro na comunicação:", err);
-    setTimeout(onlineGameLoop, 2000);
-  }
+  eventSource.onerror = function (err) {
+    console.error("Erro na conexão SSE", err);
+    // Browser attempts auto-reconnect
+  };
 }
 
 function processServerUpdate(data) {
+  if (data.step) console.log(`[DEBUG] Server Step: ${data.step}`);
+  if (data.selected) console.log(`[DEBUG] Server Selected Options:`, data.selected);
+  if (data.fromSquare !== undefined) console.log(`[DEBUG] Server FromSquare: ${data.fromSquare}`);
+
   if (data.dice !== undefined && data.dice !== null) {
-    // Extrair valor numérico do objeto de dado (suporta formatos novos e antigos)
+    // Extract numeric value from dice object (supports new and old formats)
     let diceStruct = data.dice.value !== undefined ? data.dice.value : data.dice;
-    // Se ainda for um objeto com propriedade .value (do rollDice no server), extrair
+    // If still an object with .value property (from server rollDice), extract
     let diceVal = (typeof diceStruct === 'object' && diceStruct.value !== undefined)
       ? diceStruct.value
       : diceStruct;
@@ -330,17 +347,17 @@ function processServerUpdate(data) {
     gameState.diceValue = diceVal;
     document.getElementById('diceResult').innerText = `Dado: ${diceVal}`;
 
-    // Adicionar ao histórico (com proteção contra duplicados)
+    // Add to history (with duplicate protection)
     if (data.turn) {
       const diceId = data.dice.id;
-      // Se tiver ID, usa-o para filtrar duplicados
+      // If has ID, use it to filter duplicates
       if (diceId) {
         if (diceId !== onlineState.lastProcessedDiceId) {
           addMoveToHistory(data.turn, `Lançou ${diceVal}`, data.players?.[data.turn] || "system");
           onlineState.lastProcessedDiceId = diceId;
         }
       } else {
-        // Fallback para legado
+        // Fallback for legacy
         const lastEntry = moveHistory[0];
         const isDuplicate = lastEntry &&
           lastEntry.player === data.turn &&
@@ -352,7 +369,7 @@ function processServerUpdate(data) {
       }
     }
   } else {
-    // Se data.dice for null, limpar o estado do dado localmente
+    // If data.dice is null, clear local dice state
     gameState.diceValue = null;
     document.getElementById('diceResult').innerText = "Dado: -";
   }
@@ -366,7 +383,11 @@ function processServerUpdate(data) {
 
   if (isMyTurn) {
     if (gameState.diceValue) {
-      showMessage(`É a tua vez! Dado: ${gameState.diceValue}. Clica numa peça.`);
+      if (data.dice && data.dice.keepPlaying) {
+        showMessage(`É a tua vez! Dado: ${gameState.diceValue}. Podes jogar novamente! (Lança o dado ou move)`);
+      } else {
+        showMessage(`É a tua vez! Dado: ${gameState.diceValue}. Clica numa peça.`);
+      }
     } else {
       showMessage("É a tua vez! Lança o dado.");
     }
@@ -383,7 +404,7 @@ function processServerUpdate(data) {
   if (data.pieces) {
     renderPiecesFromServer(data.pieces, gameState.size);
 
-    // Re-aplicar seleção se o servidor indicar uma peça selecionada (evita flash)
+    // Re-apply selection if server indicates selected piece (avoids flash)
     if (data.fromSquare !== undefined && data.fromSquare !== null) {
       const row = Math.floor(data.fromSquare / gameState.size);
       const col = data.fromSquare % gameState.size;
@@ -394,10 +415,10 @@ function processServerUpdate(data) {
     }
   }
 
-  // Destacar movimentos válidos (data.selected do servidor)
+  // Highlight valid moves (server's data.selected)
   if (data.selected && Array.isArray(data.selected)) {
     if (onlineState.myTurn) {
-      // Se for a minha vez, destacar como destinos possíveis
+      // If my turn, highlight as possible destinations
       data.selected.forEach(squareIndex => {
         const row = Math.floor(squareIndex / gameState.size);
         const col = squareIndex % gameState.size;
@@ -405,10 +426,10 @@ function processServerUpdate(data) {
         if (cell) cell.classList.add('highlight-move');
       });
     } else {
-      // Se não for a minha vez, destacar apenas o que o oponente selecionou?
-      // O servidor envia 'selected' como destinos válidos quando step='to'.
-      // Mas também pode enviar 'fromSquare' como a seleção atual.
-      // Para o oponente, podemos destacar o fromSquare.
+      // If not my turn, highlight only what opponent selected?
+      // Server sends 'selected' as valid destinations when step='to'.
+      // But can also send 'fromSquare' as current selection.
+      // For opponent, can highlight fromSquare.
       if (data.fromSquare !== undefined && data.fromSquare !== null) {
         const row = Math.floor(data.fromSquare / gameState.size);
         const col = data.fromSquare % gameState.size;
@@ -420,10 +441,11 @@ function processServerUpdate(data) {
     }
   }
 
-  gameState.step = data.step; // Guardar step atual do servidor
+  gameState.step = data.step; // Save current server step
 
   if (data.players) {
-    onlineState.myColor = data.players[onlineState.nick] || null;
+    const rawColor = data.players[onlineState.nick];
+    onlineState.myColor = rawColor ? rawColor.toLowerCase() : null;
   }
 }
 
@@ -431,13 +453,15 @@ function renderPiecesFromServer(pieces, size) {
   gameState.board = Array.from({ length: 4 }, () => Array(size).fill(null));
 
   if (Array.isArray(pieces)) {
+    console.log("[DEBUG] First piece from server:", pieces.find(p => p !== null));
     pieces.forEach((piece, index) => {
       if (piece) {
+        if (!piece.color) console.warn("[DEBUG] Piece without color at index", index, piece);
         const row = Math.floor(index / size);
         const col = index % size;
         if (row >= 0 && row < 4 && col >= 0 && col < size) {
           gameState.board[row][col] = {
-            color: piece.color,
+            color: piece.color ? piece.color.toLowerCase() : null, // Normalize color
             hasMoved: piece.inMotion || false,
             hasVisitedLastRow: piece.reachedLastRow || false
           };
@@ -450,7 +474,7 @@ function renderPiecesFromServer(pieces, size) {
 }
 
 // ============================================
-// HISTÓRICO DE JOGADAS
+// MOVE HISTORY
 // ============================================
 
 function addMoveToHistory(player, action, color) {
@@ -565,6 +589,10 @@ async function giveUp() {
   if (!confirm("Tens a certeza que queres desistir?")) return;
 
   if (onlineState.isOnline) {
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
     await window.server.leave(onlineState.gameId, onlineState.nick, onlineState.password);
     onlineState.isOnline = false;
     onlineState.pollingActive = false;
@@ -598,7 +626,7 @@ async function giveUp() {
   if (typeof saveScore === "function") saveScore("Humano", "Desistiu");
 }
 
-// Exportar funções globais
+// Export global functions
 window.startGame = startGame;
 window.showMessage = showMessage;
 window.passTurn = passTurn;

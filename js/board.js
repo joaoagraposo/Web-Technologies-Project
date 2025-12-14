@@ -1,4 +1,4 @@
-// constrói a grelha do tabuleiro e associa os handlers de clique
+// builds the board grid and associates click handlers
 function createBoard(size) {
   const board = document.getElementById('board');
   board.innerHTML = '';
@@ -16,19 +16,19 @@ function createBoard(size) {
   }
 }
 
-// desenha as peças nas posições atuais do tabuleiro
-function renderPieces(boardState) {
+// draws the pieces at current board positions
+function renderPieces(boardState, playerColor) {
   const cells = document.querySelectorAll('.cell');
   cells.forEach(cell => {
-    const r = Number(cell.dataset.row);
+    let r = Number(cell.dataset.row);
     const c = Number(cell.dataset.col);
 
     const occupant = boardState[r][c];
 
-    // Remover classes de highlight antigas
+    // Remove old highlight classes
     cell.classList.remove('highlight-select', 'highlight-move', 'highlight-opponent');
 
-    // Se não há ocupante, limpar conteúdo da célula
+    // If no occupant, clear cell content
     if (!occupant) {
       if (cell.firstChild) cell.innerHTML = '';
       return;
@@ -36,20 +36,19 @@ function renderPieces(boardState) {
 
     const color = typeof occupant === 'string' ? occupant : occupant.color;
 
-    // Obter ou criar o token da peça
+    // Get or create piece token
     let token = cell.querySelector('.piece');
 
-    // Se não existir ou for da cor errada, recriar
+    // If it doesn't exist or is wrong color, recreate
     if (!token || !token.classList.contains(color)) {
-      cell.innerHTML = ''; // Limpar conteúdo antigo
+      cell.innerHTML = ''; // Clear old content
       token = document.createElement('div');
       token.className = `piece ${color}`;
       token.setAttribute('aria-label', `${color} piece`);
       cell.appendChild(token);
     }
 
-    // Atualizar classes de estado visual sem recriar o elemento
-    // Remover classes de estado antigas
+    // Update visual state classes without recreating element
     token.classList.remove('last-row', 'moved', 'not-moved');
 
     if (typeof occupant === 'object') {
@@ -64,9 +63,9 @@ function renderPieces(boardState) {
   });
 }
 
-// trata cliques nas casas: selecionar peça ou confirmar destino
+// handles cell clicks: select piece or confirm destination
 function onCellClick(e) {
-  // Verificar se é modo online e se é a vez do jogador
+  // Check if online mode and if it's player's turn
   if (onlineState.isOnline && !onlineState.myTurn) {
     showMessage("Não é a tua vez.");
     return;
@@ -76,40 +75,36 @@ function onCellClick(e) {
     c.classList.remove('highlight-select', 'highlight-move');
   });
 
-  const row = Number(e.currentTarget.dataset.row);
+  let row = Number(e.currentTarget.dataset.row);
   const col = Number(e.currentTarget.dataset.col);
+
   const dice = gameState.diceValue;
   const piece = gameState.board[row][col];
 
   if (dice === null) return showMessage("Ainda não lançaste o dado.");
   if (gameState.currentPlayer !== 'human') return showMessage("Não é a tua vez.");
 
-  // No modo online, delegar lógica para o servidor (seleção e movimento)
+  // In online mode, delegate logic to server (selection and movement)
   if (onlineState.isOnline) {
     const squareIndex = row * gameState.size + col;
+    console.log(`[DEBUG] Click at (${row}, ${col}) -> Index ${squareIndex}. Current Step: ${gameState.step || 'unknown'}`);
 
-    // Enviar notificação para o servidor
-    // O servidor gere o estado (from -> to) e valida
-    const moveData = {
-      cell: {
-        square: squareIndex,
-        position: squareIndex
-      }
-    };
-
+    // Send notification to server
+    // Server manages state (from -> to) and validates
     window.server.notify(
       onlineState.gameId,
       onlineState.nick,
       onlineState.password,
-      moveData
+      squareIndex // Send only cell index (integer)
     ).then(res => {
+      console.log("[DEBUG] Notify response:", res);
       if (res.error) showMessage(res.error);
-      // O update SSE tratará de atualizar o tabuleiro
+      // SSE update will handle board refresh
     }).catch(err => {
       showMessage("Erro de comunicação ao selecionar/mover.");
     });
 
-    return; // Ignorar lógica local
+    return; // Ignore local logic
   }
 
   let humanColor = gameState.players.human;
@@ -139,13 +134,17 @@ function onCellClick(e) {
   if (piece.color !== humanColor) return showMessage("Só podes mover as tuas peças.");
 }
 
-// indica se a linha é “de avanço” para a cor dada
+// indicates if row is "forward" for given color
+// Red (Row 0): Left (<--), Row 1: Right (-->), Row 2: Left (<--), Row 3: Right (-->)
+// Blue (Row 3): Right (-->), Row 2: Left (<--), Row 1: Right (-->), Row 0: Left (<--)
 function isForwardRow(row, color) {
   if (color === 'blue') return row === 3 || row === 1;
-  return row === 0 || row === 2;
+  // Red: Row 0 (Home) moves Left (Forward), Row 1 moves Right (Backward), Row 2 moves Left (Forward)...
+  if (color === 'red') return row === 0 || row === 2;
+  return false;
 }
 
-// avança um passo a partir de uma posição seguindo as regras do Tâb
+// advances one step from a position following Tâb rules
 function moveStep(row, col, size, color) {
   const forward = isForwardRow(row, color);
   const dir = (color === 'red') ? -1 : 1;
@@ -164,11 +163,11 @@ function moveStep(row, col, size, color) {
     return { row, col: nextCol };
   }
 
-  // Transições entre linhas quando chega à extremidade
+  // Row transitions when reaching edge
   if (color === 'blue') {
     // Blue: 1ª=row3, 2ª=row2, 3ª=row1, 4ª=row0
     if (row === 0) {
-      // 4ª linha → volta para 3ª linha (row 1)
+      // 4ª linha (Last) → volta para 3ª linha (row 1)
       return { row: 1, col };
     }
     if (row === 1) {
@@ -181,23 +180,24 @@ function moveStep(row, col, size, color) {
     // row 2 (2ª) → row 1 (3ª), row 3 (1ª) → row 2 (2ª)
     return { row: row - 1, col };
   } else {
-    // Red: 1ª=row0, 2ª=row1, 3ª=row2
-    // REGRA: Red NUNCA pode entrar na 4ª linha (row 3)
+    // Red: 1ª=row0, 2ª=row1, 3ª=row2, 4ª=row3
     if (row === 3) {
-      // Se red estiver em row 3 (não deveria acontecer), volta para row 2
+      // 4ª linha (Last) → volta para 3ª linha (row 2)
       return { row: 2, col };
     }
     if (row === 2) {
-      // 3ª linha → só pode ir para 2ª linha (row 1)
-      // Red não pode ir para a 4ª linha (row 3)
-      return { row: 1, col };
+      // 3ª linha → pode ir para 4ª (row 3) OU 2ª (row 1)
+      return [
+        { row: 3, col },
+        { row: 1, col },
+      ];
     }
     // row 1 (2ª) → row 2 (3ª), row 0 (1ª) → row 1 (2ª)
     return { row: row + 1, col };
   }
 }
 
-// destaca visualmente origem e destino de uma jogada
+// visually highlights origin and destination of a move
 function highlightMove(fromRow, fromCol, toRow, toCol) {
   const originCell = document.querySelector(
     `.cell[data-row="${fromRow}"][data-col="${fromCol}"]`
@@ -210,7 +210,7 @@ function highlightMove(fromRow, fromCol, toRow, toCol) {
   if (destCell) destCell.classList.add('highlight-move');
 }
 
-// calcula destinos válidos para a peça e mostra opções ao jogador
+// calculates valid destinations for piece and shows options to player
 function computeDestination(row, col, dice, piece, size, silent = false) {
   const color = piece.color;
   const map = getPiecesMapByColor(color);
@@ -242,19 +242,19 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
     positions = nextPositions;
   }
 
-  // Filtrar destinos válidos
+  // Filter valid destinations
   let validDests = positions.filter(p => {
     const target = gameState.board[p.row][p.col];
     return !target || target.color !== color;
   });
 
-  // Regra: "As peças entram apenas uma vez na 4ª linha"
-  // Só bloquear reentrada se a peça JÁ SAIU da 4ª linha (não se ainda está lá)
+  // Rule: "Pieces enter the 4th line only once"
+  // Only block reentry if piece ALREADY LEFT 4th row (not if still there)
   const lastRow = (color === 'blue') ? 0 : 3;
   const currentlyInLastRow = (row === lastRow);
 
   if (piece.hasVisitedLastRow && !currentlyInLastRow) {
-    // Peça já visitou E já saiu da 4ª linha, não pode voltar
+    // Piece visited AND left 4th row, cannot return
     validDests = validDests.filter(p => p.row !== lastRow);
   }
 
@@ -309,34 +309,27 @@ function computeDestination(row, col, dice, piece, size, silent = false) {
   return validDests.length === 1 ? validDests[0] : validDests;
 }
 
-// aplica uma jogada: move a peça, trata capturas e jogadas extra
+// applies a move: moves piece, handles captures and extra moves
 async function applyMove(move) {
   const { from, to, piece } = move;
 
-  // Modo online - notificar servidor
+  // Online mode - notify server
   if (onlineState.isOnline) {
     if (!onlineState.myTurn) {
       showMessage("Não é a tua vez.");
       return;
     }
 
-    // Converter row,col para índice linear da célula
+    // Convert row,col to linear cell index
     const squareIndex = to.row * gameState.size + to.col;
 
-    // Estrutura exigida pelo enunciado
-    const moveData = {
-      cell: {
-        square: squareIndex,
-        position: squareIndex // Simplificação (assumindo 1 peça/casa)
-      }
-    };
-
+    // Structure required by spec (integer only)
     try {
       const res = await window.server.notify(
         onlineState.gameId,
         onlineState.nick,
         onlineState.password,
-        moveData
+        squareIndex
       );
 
       if (res.error) {
@@ -346,17 +339,17 @@ async function applyMove(move) {
       showMessage("Erro de rede ao notificar jogada.");
     }
 
-    // Limpar preview
+    // Clear preview
     gameState.movePreview = null;
     document.querySelectorAll('.cell').forEach(c => {
       c.classList.remove('highlight-select', 'highlight-move');
     });
 
-    // O tabuleiro será atualizado pelo próximo update()
+    // Board will be updated by next update()
     return;
   }
 
-  // Modo local (lógica original)
+  // Local mode (original logic)
   const target = gameState.board[to.row][to.col];
   if (target && target.color === piece.color) {
     showMessage('Casa ocupada pela tua peça.');
@@ -382,7 +375,7 @@ async function applyMove(move) {
 
   piece.hasMoved = true;
 
-  // Verificar se a peça chegou à 4ª linha (última linha do adversário)
+  // Check if piece reached 4th row (opponent's last row)
   const lastRow = (piece.color === 'blue') ? 0 : 3;
   if (to.row === lastRow) {
     piece.hasVisitedLastRow = true;
@@ -418,22 +411,31 @@ async function applyMove(move) {
   nextTurn();
 }
 
-// verifica se existe pelo menos uma jogada válida para a cor atual
+// verifies if there is at least one valid move for current color
 function canAnyMove(color) {
   const dice = gameState.diceValue;
+  console.log(`[DEBUG] canAnyMove: color=${color}, dice=${dice}`);
+
   if (dice === null) return false;
 
   const map = getPiecesMapByColor(color);
+  console.log(`[DEBUG] map has ${map.size} pieces`);
 
   for (const [piece, meta] of map) {
     const dest = computeDestination(meta.row, meta.col, dice, piece, gameState.size, true);
+    console.log(`[DEBUG] Piece at (${meta.row},${meta.col}), hasMoved=${piece.hasMoved}, dest=${dest ? JSON.stringify(dest) : 'null'}`);
+
     if (!dest) continue;
 
     const target = gameState.board[dest.row][dest.col];
     if (!target || target.color !== color) {
+      console.log(`[DEBUG] Found valid move to (${dest.row},${dest.col})`);
       return true;
+    } else {
+      console.log(`[DEBUG] Blocked by own piece at (${dest.row},${dest.col})`);
     }
   }
 
+  console.log(`[DEBUG] No moves found`);
   return false;
 }

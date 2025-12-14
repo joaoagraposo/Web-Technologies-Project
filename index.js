@@ -1,8 +1,6 @@
 /**
- * SeWenta/Tâb Game Server
+ * Tâb Game Server - Group 18
  * Entry point - index.js
- * 
- * Group 18 - Port 8118
  */
 
 const http = require('http');
@@ -96,26 +94,7 @@ data.loadData();
 const server = http.createServer(mainHandler);
 
 server.listen(PORT, () => {
-    console.log(`
-╔═══════════════════════════════════════════════════════════╗
-║                                                           ║
-║   SeWenta/Tâb Game Server                                 ║
-║   Group 18 - Port ${PORT}                                    ║
-║                                                           ║
-║   Server running at http://localhost:${PORT}                 ║
-║                                                           ║
-║   API Endpoints:                                          ║
-║     POST /register  - Register/verify user                ║
-║     POST /join      - Join game (matchmaking)             ║
-║     POST /leave     - Leave game                          ║
-║     POST /roll      - Roll dice                           ║
-║     POST /pass      - Pass turn                           ║
-║     POST /notify    - Make a move                         ║
-║     GET  /update    - SSE updates                         ║
-║     GET  /ranking   - Get rankings                        ║
-║                                                           ║
-╚═══════════════════════════════════════════════════════════╝
-`);
+    console.log(`Server running at http://twserver.alunos.dcc.fc.up.pt:${PORT}`);
 });
 
 // Handle server errors

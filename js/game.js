@@ -1,9 +1,9 @@
-// representação de uma peça do tabuleiro
+// representation of a board piece
 class Piece {
   constructor(color) {
     this.color = color;
-    this.hasMoved = false;        // já foi movida pelo menos uma vez
-    this.hasVisitedLastRow = false; // já esteve na 4ª linha (última)
+    this.hasMoved = false;        // has moved at least once
+    this.hasVisitedLastRow = false; // has visited 4th row (last)
   }
 }
 
@@ -25,7 +25,7 @@ let gameState = {
   bluePieces: new Map(),
 };
 
-// altera o valor do input de tamanho do tabuleiro
+// changes board size input value
 function changeSize(delta) {
   const input = document.getElementById('boardSize');
   const min = parseInt(input.min);
@@ -35,7 +35,7 @@ function changeSize(delta) {
   input.value = value;
 }
 
-// repõe a interface para estado jogável num novo jogo
+// resets interface to playable state for new game
 function resetGameUI() {
   document.getElementById("rollDiceBtn").disabled = false;
   document.getElementById("passTurnBtn").disabled = false;
@@ -50,7 +50,7 @@ function resetGameUI() {
   document.getElementById('diceResult').innerText = '';
 }
 
-// inicializa o estado e as peças para uma partida
+// initializes state and pieces for a match
 function initGame(size, config) {
   showMessage("Novo Jogo Iniciado.");
   resetGameUI();
@@ -77,7 +77,7 @@ function initGame(size, config) {
     `Lance o dado, ${gameState.currentPlayer}`;
 }
 
-// cria as peças iniciais nas linhas 0 e 3
+// creates initial pieces on rows 0 and 3
 function initPieces(size) {
   const board = Array.from({ length: 4 }, () => Array(size).fill(null));
 
@@ -111,22 +111,22 @@ function initPieces(size) {
   return board;
 }
 
-// devolve o mapa de peças do adversário
+// returns adversary piece map
 function getAdversaryMapColor(color) {
   return color === 'blue' ? gameState.redPieces : gameState.bluePieces;
 }
 
-// devolve o mapa de peças da cor indicada
+// returns piece map for given color
 function getPiecesMapByColor(color) {
   return color === 'blue' ? gameState.bluePieces : gameState.redPieces;
 }
 
-// devolve a linha inicial para a cor dada
+// returns start row for given color
 function getStartRowByColor(color) {
   return color === 'blue' ? 3 : 0;
 }
 
-// verifica se existe alguma peça dessa cor na linha inicial
+// checks if any piece of this color is in start row
 function anyInStartRow(color) {
   const map = getPiecesMapByColor(color);
   const startRow = getStartRowByColor(color);
@@ -136,7 +136,7 @@ function anyInStartRow(color) {
   return false;
 }
 
-// alterna a vez entre humano e IA
+// toggles turn between human and AI
 function nextTurn() {
   gameState.currentPlayer =
     gameState.currentPlayer === 'human' ? 'ai' : 'human';
@@ -156,7 +156,7 @@ function nextTurn() {
   }
 }
 
-// verifica condição de vitória e termina o jogo se aplicável
+// checks win condition and ends game if applicable
 function checkWin() {
   let hasBlue = false;
   let hasRed = false;
@@ -188,7 +188,7 @@ function checkWin() {
 
     saveScore(winnerName, "Vitória");
 
-    // Mostrar popup de configuração após 2 segundos para iniciar novo jogo
+    // Show config popup after 2 seconds to start new game
     setTimeout(() => {
       const configPopup = document.getElementById("configPopup");
       if (configPopup) {

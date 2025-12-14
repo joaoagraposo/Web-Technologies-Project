@@ -297,7 +297,7 @@ function pass(nick, password, gameId) {
  * @param {Object} move
  * @returns {Object}
  */
-function notify(nick, password, gameId, move) {
+function notify(nick, password, gameId, cell) {
     if (!auth.verifyUser(nick, password)) {
         return { error: 'Authentication failed' };
     }
@@ -315,11 +315,12 @@ function notify(nick, password, gameId, move) {
         return { error: 'Not your turn' };
     }
 
-    if (!move || !move.cell) {
-        return { error: 'Invalid move format' };
+    // Validate cell is an integer
+    if (typeof cell !== 'number' || cell < 0) {
+        return { error: 'Invalid cell index' };
     }
 
-    const { square, position } = move.cell;
+    const square = cell;
     const playerColor = game.players[nick];
 
     // Check for re-selection (clicking another own piece while in 'to' step)
@@ -516,6 +517,11 @@ function getGameState(gameId, nick) {
  */
 function checkMustPass(game, nick) {
     const validPieces = findValidPieces(game, nick);
+    console.log(`[PASS CHECK] Nick: ${nick}, Dice: ${game.dice ? game.dice.value : 'null'}, Valid Pieces: ${validPieces.length}`);
+    if (validPieces.length === 0 && game.dice) {
+        // Detailed debug if no moves found but dice exists
+        console.log(`[PASS CHECK DETAIL] No moves found. Dice Value: ${game.dice.value}. Players set: ${JSON.stringify(game.players)}`);
+    }
     return validPieces.length === 0;
 }
 
@@ -560,7 +566,7 @@ function calculateValidDestinations(game, squareIndex) {
         return [];
     }
 
-    // RULE: "Uma peça na 4ª linha só se pode mover se o jogador não tiver mais peças na sua linha inicial"
+    // RULE: A piece on the 4th row can only move if the player has no more pieces on their starting row
     // Check if piece is in the 4th line (last row for this color)
     const lastRow = (color === 'blue') ? 0 : 3;
     const startRow = (color === 'blue') ? 3 : 0;
@@ -660,21 +666,28 @@ function isValidBranch(piece, destination, color, size) {
 }
 
 /**
+ * Check if the row follows "forward" direction for the color
+ * Matches client logic in js/board.js
+ */
+// Matches client logic in js/board.js
+function isForwardRow(row, color) {
+    if (color === 'blue') return row === 3 || row === 1;
+    // Red moves Left (Forward) on Home Row 0 and Row 2
+    if (color === 'red') return row === 0 || row === 2;
+    return false;
+}
+
+/**
  * Move one step on the board following Tâb rules
+ * Ported from client logic (js/board.js) to ensure consistency
  */
 function moveOneStep(row, col, size, color) {
-    // Direction based on color and row
-    // Blue: rows 0,2 move right, rows 1,3 move left
-    // Red: rows 1,3 move right, rows 0,2 move left
-
-    const isForwardRow = (color === 'blue')
-        ? (row === 1 || row === 3)
-        : (row === 0 || row === 2);
-
+    const forward = isForwardRow(row, color);
     const dir = (color === 'red') ? -1 : 1;
+
     let nextCol, atEdge;
 
-    if (isForwardRow) {
+    if (forward) {
         nextCol = col + dir;
         atEdge = (dir === 1) ? (nextCol >= size) : (nextCol < 0);
     } else {
@@ -688,18 +701,36 @@ function moveOneStep(row, col, size, color) {
 
     // Row transitions
     if (color === 'blue') {
-        if (row === 0) return { row: 1, col };
-        if (row === 1) return [{ row: 0, col }, { row: 2, col }];
-        if (row === 2) return { row: 1, col };
-        if (row === 3) return { row: 2, col };
+        // Blue: 1st=row3, 2nd=row2, 3rd=row1, 4th=row0
+        if (row === 0) {
+            // 4th line -> returns to 3rd line (row 1)
+            return { row: 1, col };
+        }
+        if (row === 1) {
+            // 3rd line -> can go to 4th (row 0) OR 2nd (row 2)
+            return [
+                { row: 0, col },
+                { row: 2, col }
+            ];
+        }
+        // row 2 (2nd) -> row 1 (3rd), row 3 (1st) -> row 2 (2nd)
+        return { row: row - 1, col };
     } else {
-        if (row === 0) return { row: 1, col };
-        if (row === 1) return { row: 2, col };
-        if (row === 2) return { row: 1, col };
-        // Red cannot enter row 3
+        // Red: 1st=row0, 2nd=row1, 3rd=row2, 4th=row3
+        if (row === 3) {
+            // 4th line (Last) -> returns to 3rd line (row 2)
+            return { row: 2, col };
+        }
+        if (row === 2) {
+            // 3rd line -> can go to 4th (row 3) OR 2nd (row 1)
+            return [
+                { row: 3, col },
+                { row: 1, col }
+            ];
+        }
+        // row 1 (2nd) -> row 2 (3rd), row 0 (1st) -> row 1 (2nd)
+        return { row: row + 1, col };
     }
-
-    return { row, col };
 }
 
 /**

@@ -1,3 +1,4 @@
 *.py
 *.pyc
-project_dump.txt
+*.txt
+requirement-project-tw-md

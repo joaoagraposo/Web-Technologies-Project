@@ -1098,5 +1098,405 @@
     "step": null,
     "selected": [],
     "createdAt": 1765739078964
+  },
+  "c1486e5c521bca6352b16c0a086b7b85": {
+    "id": "c1486e5c521bca6352b16c0a086b7b85",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "jr": "red",
+      "gm": "blue"
+    },
+    "initial": "gm",
+    "turn": "gm",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "gm",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765746750156
+  },
+  "8794bc2da26ea1d9a3107cbabe84cde4": {
+    "id": "8794bc2da26ea1d9a3107cbabe84cde4",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gm": "red",
+      "jr": "blue"
+    },
+    "initial": "gm",
+    "turn": "jr",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "red",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "gm",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765746929520
+  },
+  "9bc2007940ed6d6584ee77909bf84136": {
+    "id": "9bc2007940ed6d6584ee77909bf84136",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "jr": "red",
+      "gm": "blue"
+    },
+    "initial": "gm",
+    "turn": "jr",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "red",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "jr",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765747376080
+  },
+  "5906678cd5df7602c0b4d8609ece622a": {
+    "id": "5906678cd5df7602c0b4d8609ece622a",
+    "group": 18,
+    "size": 7,
+    "status": "finished",
+    "players": {
+      "gm": "red",
+      "jr": "blue"
+    },
+    "initial": "jr",
+    "turn": "gm",
+    "pieces": [
+      {
+        "color": "red",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "red",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      {
+        "color": "red",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": true,
+        "reachedLastRow": false
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      {
+        "color": "blue",
+        "inMotion": false,
+        "reachedLastRow": false
+      },
+      null
+    ],
+    "dice": null,
+    "mustPass": false,
+    "winner": "jr",
+    "step": null,
+    "selected": [],
+    "createdAt": 1765748205707
   }
 }

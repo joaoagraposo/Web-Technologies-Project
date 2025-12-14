@@ -1,4 +1,4 @@
-// guarda uma entrada na tabela e no localStorage
+// saves an entry in table and localStorage
 function saveScore(player, result) {
   const date = new Date().toLocaleString('pt-PT');
   const tbody = document.querySelector("#scoreTable tbody");
@@ -17,7 +17,7 @@ function saveScore(player, result) {
   localStorage.setItem("tabScores", JSON.stringify(savedScores));
 }
 
-// carrega as entradas guardadas do localStorage ou do servidor
+// loads saved entries from localStorage or server
 async function loadScores() {
   const serverCheckbox = document.getElementById("serverRanking");
   const useServer = serverCheckbox && serverCheckbox.checked;
@@ -27,7 +27,7 @@ async function loadScores() {
     return;
   }
 
-  // Restaurar cabeçalhos originais para modo local
+  // Restore original headers for local mode
   const thead = document.querySelector("#scoreTable thead tr");
   if (thead) {
     thead.innerHTML = `
@@ -37,7 +37,7 @@ async function loadScores() {
     `;
   }
 
-  // Carregar do localStorage (lógica original)
+  // Load from localStorage (original logic)
   const tbody = document.querySelector("#scoreTable tbody");
   tbody.innerHTML = "";
 
@@ -59,16 +59,16 @@ async function loadScores() {
   });
 }
 
-// carrega ranking do servidor
+// loads ranking from server
 async function loadServerRanking() {
-  // Ler valores dos selectores UI
+  // Read UI selector values
   const groupInput = document.getElementById("rankingGroup");
   const sizeSelect = document.getElementById("rankingSize");
 
   const group = groupInput ? parseInt(groupInput.value) || 18 : 18;
   const size = sizeSelect ? parseInt(sizeSelect.value) || 7 : 7;
 
-  // Atualizar cabeçalhos da tabela para modo servidor
+  // Update table headers for server mode
   const thead = document.querySelector("#scoreTable thead tr");
   if (thead) {
     thead.innerHTML = `
@@ -84,7 +84,7 @@ async function loadServerRanking() {
   tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>A carregar ranking...</td></tr>";
 
   try {
-    // Usar o módulo server.js que tem o URL correto
+    // Use server.js module which has correct URL
     const data = await window.server.ranking(group, size);
 
     if (data.error) {
@@ -121,7 +121,7 @@ async function loadServerRanking() {
   }
 }
 
-// apaga todas as entradas guardadas
+// deletes all saved entries
 function clearScores() {
   if (confirm("Tens a certeza que queres limpar as classificações?")) {
     localStorage.removeItem("tabScores");
@@ -129,7 +129,7 @@ function clearScores() {
   }
 }
 
-// liga as funções do scoreboard à interface no arranque
+// binds scoreboard functions to interface on startup
 function initScoreboard() {
   const clearBtn = document.getElementById("clearScores");
   clearBtn.addEventListener("click", clearScores);
@@ -139,7 +139,7 @@ function initScoreboard() {
   const loadRankingBtn = document.getElementById("loadRankingBtn");
 
   if (serverCheckbox) {
-    // Toggle visibilidade dos filtros e recarregar
+    // Toggle filter visibility and reload
     serverCheckbox.addEventListener("change", () => {
       if (rankingFilters) {
         rankingFilters.classList.toggle("hidden", !serverCheckbox.checked);
@@ -148,7 +148,7 @@ function initScoreboard() {
     });
   }
 
-  // Botão para carregar ranking manualmente
+  // Button to manually load ranking
   if (loadRankingBtn) {
     loadRankingBtn.addEventListener("click", loadServerRanking);
   }

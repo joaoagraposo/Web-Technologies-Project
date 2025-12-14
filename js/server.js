@@ -1,5 +1,5 @@
-const SERVER = "http://twserver.alunos.dcc.fc.up.pt:8008";
-//const SERVER = "http://localhost:8118";
+const SERVER = "http://twserver.alunos.dcc.fc.up.pt:8118";
+// const SERVER = "http://localhost:8118";
 
 /* POST helper */
 async function post(path, body) {
@@ -33,7 +33,7 @@ function register(nick, password) {
 
 /* ------------------- join ----------------------- */
 /*
- * Pedido correto segundo enunciado:
+ * Correct request according to spec:
  * {
  *   "group": <int>,
  *   "nick": "<string>",
@@ -70,22 +70,23 @@ function roll(game, nick, password) {
 }
 
 /* ---------------- notify (mover peça) ------------ */
+/* ---------------- notify (mover peça) ------------ */
 /*
- * Estrutura segundo enunciado:
+ * Structure according to spec:
  *  {
  *      "nick": "...",
  *      "password": "...",
  *      "game": "...",
- *      "move": { "cell": { "square": <int>, "position": <int> } }
+ *      "cell": <int>
  *  }
  */
-function notify(game, nick, password, move) {
-    return post("notify", { nick, password, game, move });
+function notify(game, nick, password, cell) {
+    return post("notify", { nick, password, game, cell });
 }
 
 /* ---------------- pass ---------------------------- */
 /*
- * Quando jogador passa:
+ * When player passes:
  * {
  *   "nick": "...",
  *   "password": "...",
@@ -166,7 +167,7 @@ function handleRanking(res) {
     return { ok: true, ranking: res.ranking };
 }
 
-// Expor funções globalmente para uso em app.js
+// Export functions globally to use in app.js
 window.server = {
     SERVER,
     register,

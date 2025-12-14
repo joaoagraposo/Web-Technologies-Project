@@ -19,6 +19,16 @@
       "nick": "gus",
       "games": 12,
       "victories": 7
+    },
+    "jr": {
+      "nick": "jr",
+      "games": 4,
+      "victories": 2
+    },
+    "gm": {
+      "nick": "gm",
+      "games": 4,
+      "victories": 2
     }
   }
 }

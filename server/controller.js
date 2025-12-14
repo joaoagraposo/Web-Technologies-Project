@@ -204,13 +204,14 @@ async function handleNotify(req, res) {
     }
 
     const body = await parseBody(req);
-    const { nick, password, game: gameId, move } = body;
+    const { nick, password, game: gameId, cell } = body;
 
     if (!nick || !password || !gameId) {
         return sendError(res, 'Nick, password, and game are required', 400);
     }
 
-    const result = game.notify(nick, password, gameId, move);
+    // Pass cell directly
+    const result = game.notify(nick, password, gameId, cell);
 
     if (result.error) {
         return sendError(res, result.error, 400);
@@ -222,6 +223,9 @@ async function handleNotify(req, res) {
 /**
  * GET /update (Polling - returns JSON immediately)
  * Note: The spec mentions SSE, but our client uses polling
+ */
+/**
+ * GET /update (SSE Implementation)
  */
 function handleUpdate(req, res) {
     if (req.method !== 'GET') {
@@ -235,27 +239,8 @@ function handleUpdate(req, res) {
         return sendError(res, 'Nick and game are required', 400);
     }
 
-    // Get current game state and return immediately (polling mode)
-    const gameData = data.getGame(gameId);
-
-    if (!gameData) {
-        return sendError(res, 'Game not found', 404);
-    }
-
-    // Return the game state
-    const state = {
-        pieces: gameData.pieces,
-        players: gameData.players,
-        initial: gameData.initial,
-        turn: gameData.turn,
-        dice: gameData.dice,
-        mustPass: gameData.mustPass,
-        step: gameData.step,
-        selected: gameData.selected,
-        winner: gameData.winner
-    };
-
-    sendJson(res, state);
+    // Delegate to game logic which implements SSE
+    game.handleUpdate(nick, gameId, res);
 }
 
 /**

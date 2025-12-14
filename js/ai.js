@@ -1,9 +1,9 @@
-// executa a jogada da IA quando é a sua vez
+// executes AI move when it's its turn
 function aiMove() {
   if (gameState.currentPlayer !== "ai") return;
 
   gameState.extramove = false;
-  
+
   const aiColor = gameState.players.ai;
   console.log(`\n=== AI TURN START (${aiColor.toUpperCase()}) ===`);
 
@@ -23,7 +23,7 @@ function aiMove() {
   }, 600);
 }
 
-// calcula e realiza uma jogada válida da IA consoante o nível de dificuldade
+// calculates and performs a valid AI move according to difficulty level
 function performAIMove(color, level) {
   if (!gameState || gameState.currentPlayer !== 'ai') return;
 

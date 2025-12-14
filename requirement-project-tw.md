@@ -338,3 +338,124 @@ scp -J up999999999@ssh.alunos.dcc.fc.up.pt * up999999999@twserver-be:pasta
    b. Se mustPass=true, passar (pass)
    c. Senão, selecionar peça e destino (notify)
 5. Repetir até haver vencedor
+
+
+Registo
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+.../register	{"nick": "zp", "password": "secret"}	{}	Registo sucedido
+.../register	{"nick": "zp", "password": "just checking"}	{ "error": "User registered with a different password"}	Registo falhado
+.../register	{"nick": "zp", "password": "secret"}	{}	Confirmação da password
+.../register	{"nick": "jpleal", "password": "another"}	{}	Outro registo
+
+
+Início
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+.../join	{"group": 99, "nick": "zp", "password": "secret" }	{"error": "undefined size"}	Tamanho não definido
+.../join	{ ... , "size": "large" }	{"error": "invalid size 'large'"}	Tamanho tem de ser inteiro impar
+.../join	{"group": 99, "nick": "zp", "password": "secret", "size": 9 }	{"game": "fa93b40..."}	Novo jogo criado com tamanho 9 para o grupo 99
+.../update?nick=zp&game=averseda		{ "error": "Invalid game reference"}	Exemplo de possível erro
+.../update?nick=zp&game=fa93b40...			Primeiro jogador fica à espera
+.../join	{"group": 99, "nick": "jpleal", "password": "another", "size": 9 }	{"game": "fa93b40..."}	Emparelhado com último jogo de tamanho 9 do grupo 99
+Atualização de ambos os jogadores		{"pieces":[{...}, ...],"initial":"zp", "step":"from", "turn":"zp", "players":{"zp":"Blue","jpleal":"Red"}}	Atualização quando jogadores são emparelhados
+
+
+Saída
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+.../join	{"group": 99, "nick": "zp", "password": "secret", "size": 9 }	{"game": "fa93b4..."}	Novo jogo criado
+.../update?nick=zp&game=fa93b4...			Primeiro jogador fica à espera
+.../leave	{"nick": "zp", "password": "secret", "game": "fa93b4..." }	{}	Desistiu da espera
+Atualização do jogador		{ "winner": null }	Terminou sem vencedores
+.../join	{"group": 99, "nick": "zp", "password": "secret", "size": 9 }	{"game": "2fd9d..."}	Novo jogo criado
+.../update?nick=zp&game=2fd9d...			Primeiro jogador aguarda eventos
+.../join	{"group": 99, "nick": "jpleal", "password": "another"," size": 9 }	{"game": "2fd9d..."}	Emparelhado último jogo
+.../update?nick=jpleal&game=2fd9d...			Segundo jogador aguarda eventos
+Atualização de ambos os jogadores		{ "pieces": [[...]], "turn": "zp", "step": "from", ... }	Começou o jogo
+.../leave	{"nick": "zp", "password": "secret", "game": "2fd9d..." }	{}	Saiu do jogo
+Atualização de ambos os jogadores		{ "winner": "jpleal" }	Adversário ganhou
+
+Lançar dado
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+Atualização de ambos os jogadores		{ "turn": "zp", "pieces": [ ... ], ... }	Começou o jogo
+.../roll	{ "nick": "jpleal", "password": "another", "game": "2fd9d..." }	{ "error": "Not your turn to play" }	Tentou lançar fora de vez
+.../roll	{ "nick": "zp", ... }	{}	Lançamento válido
+Atualização de ambos os jogadores		{ {"dice":{"stickValues":[false,false,false,false], "value":6,"keepPlaying":true},"turn":"zp","mustPass":null} }	Não pode mover nenhuma peça, mas pode voltar a lançar
+.../roll	{ "nick": "zp", ... }	{}	Lançamento válido
+Atualização de ambos os jogadores		{ {"dice":{"stickValues":[false,true,false,false], "value":1,"keepPlaying":true},"turn":"zp","mustPass":null} }	Saiu 1 (Tâb) e pode jogar a peça mais à direita
+
+Passar a vez
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+Atualização de ambos os jogadores		{ "turn": "jpleal", "pieces": [ ... ], ... }	Começou o jogo
+.../roll	{ "nick": "jpleal", ... }	{}	lançamento válido
+Atualização de ambos os jogadores		{"dice":{"stickValues":[false,true,false,true], "value":2,"keepPlaying": false},"turn":"jpleal", "mustPass":"jpleal"}	Ainda tem a vez mas tem de passar porque não pode mover nenhuma peça, nem pode voltar a lançar. "password": "another", "game": "2fd9d
+.../pass	{ "nick": "zp", "password": "another", "game": "2fd9d..." }	{}	Passou a vez
+Atualização de ambos os jogadores		{ "turn": "zp", ... } 	É a vez de jogar do adversário.
+.../roll	{ "nick": "zp", ..." }	{}	lançamento válido
+Atualização de ambos os jogadores		{"dice":{"stickValues":[false,false,false,false], "value":6,"keepPlaying":true}, "turn":"zp", "mustPass":null}	Saiu 6, não pode mover mas pode voltar a lançar
+.../pass	{ "nick": "zp", ... }	{ "error": "You already rolled the dice but can roll it again"}	Não pode passar a vez
+.../roll	{ "nick": "zp", ..." }	{}	
+Atualização de ambos os jogadores		{"dice":{"stickValues":[false,true,false,false], "value":1, "keepPlaying":true},"turn":"zp", "mustPass": null }	Saiu 1 (Tâb) e pode jogar a peça mais à direita
+.../pass	{ "nick": "zp", "password": "another", "game": "2fd9d..." }	{ "error": "You already rolled the dice and have valid moves"}	Não pode passar a vez
+
+Mover - jogadas inválidas
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+.../notify	{ "nick": "jpleal", "password": "another", "game": "2fd9d...", "cell": 26 }	{ "error": "not your turn to play" }	Jogada inválida
+.../notify	{ "nick": "zp", "password": "secret", "game": "2fd9d...", "cell": true }	{ "error": "cell is not an integer" }	Jogada invalida
+.../notify	{ "nick": "zp", "password": "secret", "game": "2fd9d...", "cell": -1 }	{ "error": "cell is negative" }	Jogada inválida
+.../notify	{"nick": "zp", "password": "secret", "game": "2fd9d...", "cell": 0 }	{ "error": "cannot capture to your own piece"}	jogada inválida
+.../notify	{"nick": "zp", "password": "secret", "game": "2fd9d...", "cell": 8 }	{}	Jogada válida
+Atualização de ambos os jogadores		{ "turn": "zp", dice: null, "step": "from", initial: "zp" "pieces": [ ... ] }	Mantém turno mas dado já foi usado
+
+Mover - começar
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+.../notify	{"nick": "zp", "password": "secret", "game": "2fd9d...", "cell": 8 }	{}	Jogada válida
+Atualização de ambos os jogadores		{ "cell": 8, "selected": [ 8, 9], "initial": "zp", dice: null, "step": "from", turn: "zp" "pieces": [ ... ], ... }	Mantém turno mas dado já foi usado
+.../roll	{ "nick": "zp", ... }	{}	Novo lançamento
+Atualização de ambos os jogadores		{ {"dice":{"stickValues":[false,true,false,true], "value":2,"keepPlaying":false},"turn":"zp","mustPass":null} }	Saiu 2 e só pode jogar a peça já movida.
+.../notify	{"nick": "zp", "password": "secret", "game": "2fd9d...", "cell": 9 }	{}	Jogada válida
+Atualização de ambos os jogadores		{ "cell": 9, "selected: [9, 11], dice: null, "initial": "jpleal", , "step": "from", turn: "zp" "pieces": [ ... ], ... }	Turno muda para adversário
+
+Jogar - escolher
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+Atualização de ambos os jogadores		{ "dice": { ...; "value": 3, ...}, "turn": "zp", "step": "from", "mustPass": false }	Está no passo de selecionar a peça (from).
+.../notify	{"nick": "zp", ..., "cell": 25 }	{}	Jogada valida, mas incompleta.
+Atualização de ambos os jogadores		{ "cell": 25, "selected": [28,10]"turn": "zp", "step": "to", "pieces": [ ... ], ... }	Pode selecionar 10 ou 28 como destino (to)
+.../notify	{ "nick": "zp", ... , "cell": 26 }	{ "error": "Invalid move: must play the dice's value" }	Jogada inválida
+.../notify	{ "nick": "zp", ... , "cell": 28 }	{}	Jogada válida
+Atualização de ambos os jogadores		{ "cell": 25, "selected": [25, 28], "turn": "jpleal", "step": "from", ... }	Muda a vez, selecionar peça a mover
+
+Jogar - reverter seleção
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+Atualização de ambos os jogadores		{ "turn": "zp", "step": "from", "pieces": [ ... ], ... }	Mudou a vez, selecionar peça
+.../notify	{"nick": "zp", "password": "secret", "game": "2fd9d...", "cell": 25 }	{}	Jogada válida de seleção de peça, mas requer o passo de escolha do destino
+Atualização de ambos os jogadores		{ "cell": 25, ..., "turn": "zp", "step": "to", ... }	Notificação da jogada, selecionar destino (tabuleiro não é modificado)
+.../notify	{"nick": "zp", ..., "cell": 25 }	{}	Escolheu peça correntemente selecionada, anulando a seleção
+Atualização de ambos os jogadores		{ ..., "turn": "zp", "step": "from", ... }	Notificação da reversão, tem de selecionar uma peça (novamente)
+
+Ganhar
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+Atualização de ambos os jogadores		{ "turn": "jpleal", "step": "from", "pieces": [...], ... }	Recebe a vez
+.../roll	{ "nick": "jplea", "password": "another", "game": "2fd9d..." }	{}	lançamento válido
+Atualização de ambos os jogadores		{ {"dice":{"stickValues":[false,false,false,false], "value":6,"keepPlaying":true},"turn":"zp","mustPass":null} }	Lançamento válido
+.../notify	{ "nick": "jpleal", "password": "another", "game": "2fd9d...", "cell": 12 }	{}	Captura última peça
+Atualização de ambos os jogadores		{ "winner": "jpleal", "pieces": [...], ... }	Venceu
+Não esquecer de fechar server sent events deste jogo
+
+Tabela classificativa
+
+URL	Objeto no pedido	Objeto na resposta	Observações
+.../ranking	{}	{ "error": "Undefined group" }	Pedido invalido
+.../ranking	{ "group": 99 }	{ "error": "Invalid size 'undefined'" }	Pedido invalido
+.../ranking	{ "group": 99, "size": 3.1416 }	{ "error": "Invalid size '3.1416'" }	Pedido invalido
+.../ranking	{ "group": "2 of us", "size": 3 }	{ "error": "Invalid group '2 of us'" }	Pedido invalido
+.../ranking	{"group": 99, "size": 5 }	{ ranking: [] }	Ainda sem tabela classificativa
+.../ranking	{ "group": 99, "size": 9 }	{ "ranking": [{"nick":"jpleal","victories":2,"games":2},{"nick":"zp","victories":0,"games":2}] }	Tabela classificativa
